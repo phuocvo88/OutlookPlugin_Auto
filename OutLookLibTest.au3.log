@@ -1,6 +1,7 @@
 
-(1) Tests (1) Total Assertions (0) Pass (1) Fail
-Total Time: 22804.71 seconds
+(2) Tests (2) Total Assertions (1) Pass (1) Fail
+Total Time: 19.06 seconds
 
 ASSERTION	MESSAGE
-1               Error in Test Yellow -> See attachment for more details: E:\Work\Outlook Plugin\test calculation\TestScenarioOutlookPlugIn\Report_20211026\Test Yellow_2021-26-10_11-07-38.jpg
+1               Error in test sheet 2 -> See attachment for more details: E:\Work\Outlook Plugin\OutLookPlugin_auto\Report_20211027\test sheet 2_2021-27-10_16-15-55.jpg
+2               Test is PASSED: test sheet 3 -> See attachment for more details: E:\Work\Outlook Plugin\OutLookPlugin_auto\Report_20211027\test sheet 3_2021-27-10_16-16-03.jpg

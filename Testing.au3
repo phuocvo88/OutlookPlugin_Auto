@@ -18,12 +18,14 @@ Global $attachmentPath
 Func Test( $testName )
 	; Reset Global Variables
 	$iTestCount += 1
+
 	$sCurrentTestName = $testName
 
-	If $iTestCount > 1 Then
-		Call ("TestTearDown" )
-	EndIf
+;~ 	If $iTestCount > 1 Then
+;~ 		Call ("TestTearDown" )
+;~ 	EndIf
 
+Sleep(3000)
 	Call( "TestSetup" )
 EndFunc
 

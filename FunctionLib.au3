@@ -7,11 +7,11 @@
 #include <WinAPIProc.au3>
 #include <Date.au3>
 #include <WinAPIFiles.au3>
-
+#include <Excel.au3>
 #include <ScreenCapture.au3>
 
 AutoItSetOption('MouseCoordMode', 0)
-Global $iPID
+Global $iPID, $oOutlook, $oMail
 
 Global Enum $iScientific, $iStandard = 1
 
@@ -23,31 +23,123 @@ Global $date, $time, $dateTime
 Global $testcaseName
 
 
-Func StartApp()
+Func StartApp_old()
 
 
 	;this part will be put in set up
 	$iPID = Run("C:\Program Files\Microsoft Office\root\Office16\OUTLOOK.EXE")
 	ConsoleWrite("PID value = " & $iPID & @CRLF)
 	AutoItSetOption('MouseCoordMode', 0)
-	Local $outLook = WinWait("Inbox - P.Minh@aswhiteglobal.com - Outlook")
+	$oOutlook = WinWait("Inbox - P.Minh@aswhiteglobal.com - Outlook")
+	;Local $outLook = WinWait("Inbox - P.Minh@aswhiteglobal.com - Outlook")
 	WinSetState("Inbox - P.Minh@aswhiteglobal.com - Outlook", "", @SW_MAXIMIZE )
 	WinGetHandle("Inbox - P.Minh@aswhiteglobal.com - Outlook")
 	ConsoleWrite("launch ok"  & @CRLF)
-	Sleep(3000)
+	Sleep(1500)
 
 
 EndFunc
 
+
+Func StartApp()
+	 $oOutlook = ObjCreate("Outlook.Application")
+	 ;$iPID = ProcessExists("OUTLOOK.EXE")
+	 ;ConsoleWrite("PID in start app = " & $iPID & @CRLF)
+	 $oMail = $oOutlook.CreateItem(0)
+    $oMail.Display
+
+
+EndFunc
+
+
 Func CloseApp()
+	$iPID = ProcessExists("OUTLOOK.EXE")
+	ConsoleWrite("PID gain in close app = " & $iPID & @CRLF)
+;~ 	;ConsoleWrite("outlook process value gain in close app = " & $oOutlook & @CRLF)
 	ProcessClose( $iPID )
 	_WinAPI_TerminateProcess($iPID,0)
+;~ 	ProcessClose( $oOutlook )
+;~ 	_WinAPI_TerminateProcess($oOutlook,0)
 	If ProcessWaitClose( $iPID, 10) = 1 Then
 
 		Return True
 	Else
 		Return False
 	EndIf
+EndFunc
+
+
+Func InputDataFromExcel($sheetname)
+
+Local $oExcel = _Excel_Open()
+Local $oWorkbook = _Excel_BookOpen($oExcel, @ScriptDir & "\InputData.xlsx")
+
+;~ Local $oRange = $oWorkbook.ActiveSheet.Range("B5").Select ;;=> to copy a text then we paste later
+     $oExcel.CopyObjectsWithCells = True
+     $oExcel.Selection.Copy
+
+Local $sBodyHeader = _Excel_RangeRead($oWorkBook,$sheetname,"B5",1) & @CRLF & @CRLF
+Local $BodyMess = _Excel_RangeRead($oWorkBook,$sheetname,"B6",1) & @CRLF & @CRLF
+Local $sBodyFooter = _Excel_RangeRead($oWorkBook,$sheetname,"B7",1)  ; @CRLF & @CRLF & "This is footer of body message"  & @CRLF & @CRLF
+
+Local $Reicpt_SendTo = _Excel_RangeRead($oWorkBook,$sheetname,"B1")
+Local $Reicpt_SendCc = _Excel_RangeRead($oWorkBook,$sheetname,"B2")
+Local $Reicpt_SendBcc = _Excel_RangeRead($oWorkBook,$sheetname,"B3")
+Local $titleEmail = _Excel_RangeRead($oWorkBook,$sheetname,"B4")
+
+
+
+;~ Local $oOutlook = ObjCreate("Outlook.Application")
+;~ Local $oMail = $oOutlook.CreateItem(0)
+;~     $oMail.Display
+    $oMail.To = $Reicpt_SendTo ;"sample@example.com"
+    $oMail.Subject = $titleEmail ;"Sample Subject"
+
+
+
+
+
+Local $oWordEditor = $oOutlook.ActiveInspector.wordEditor
+    $oWordEditor.Range(0, 0).Select
+    $oWordEditor.Application.Selection.TypeText($sBodyHeader)
+    ;$oWordEditor.Application.Selection.Paste   ;;=> paste the text we copied previously
+	$oWordEditor.Application.Selection.TypeText($BodyMess)
+    $oWordEditor.Application.Selection.TypeText($sBodyFooter)
+
+$oMail.Display
+
+Sleep(2000)
+	_Excel_BookClose($oWorkBook, False)
+	_Excel_Close($oExcel, False)
+
+EndFunc
+
+#Region Phuoc workaround to send data into Outlook mail composer
+Func ClickNewEmail()
+	Local $x=0,$y=0
+	Local $search
+
+	MouseMove(@DesktopWidth/2 , @DesktopHeight/2)
+	Sleep(2000)
+	$search = _ImageSearch(@ScriptDir&'\newEmailBtn.bmp',1, $x, $y, 0)
+
+	ConsoleWrite("step 1"  & @CRLF)
+	;MsgBox(0, "Location", "x = " & $x & " & y= " & $y)
+	if $search = 1 then
+		ConsoleWrite("step 2"  & @CRLF)
+		MouseMove ( $x , $y )
+		;MouseClick($MOUSE_CLICK_LEFT)
+		MouseClick($MOUSE_CLICK_LEFT, $x, $y ,1)
+	EndIf
+
+	Sleep(500)
+	WinWait("Untitled - Message (HTML) ", "", 2)
+	WinSetState("Untitled - Message (HTML) ",  "", @SW_MAXIMIZE)
+
+
+	;WinWaitActive("[CLASS:DirectUIHWND]")
+	Sleep(3000)
+
 EndFunc
 
 Func SetDataForEmail($sheetname)
@@ -79,66 +171,9 @@ Sleep(3000)
 
 EndFunc
 
-Func SetDataForEmail_2($sheetname)
-	$inputData = getContentFromExcel($sheetname)
-	$receipient_SendTo = $inputData[0]
-	$receipient_SendCc = $inputData[1]
-	$receipient_SendBcc = $inputData[2]
-	$mail_Title = $inputData[3]
-	$mail_BodyMess = $inputData[4]
-
-
-;~ 	ControlSetText("Untitled - Message (HTML) ", "", "[Class:RichEdit20WPT; Instance:2]",$receipient_SendTo,1)
-;~ 	Sleep(1000)
-;~ 	Send( "{TAB} ")
-
-;~ 	ControlSetText("Untitled - Message (HTML) ", "", "[Class:RichEdit20WPT; Instance:3]",$receipient_SendCc ,1)
-;~ 	Sleep(1000)
-	Send( "{TAB} ")
-
-	ControlSetText("Untitled - Message (HTML) ", "", "[Class:RichEdit20WPT; Instance:5]", $mail_Title,1)
-	Sleep(1000)
-
-	Send( "{TAB} ")
-	Send( "{TAB} ")
-	;$mail_BodyMess =   StringReplace(StringReplace($mail_BodyMess,"{ALT}"," "),"{ENTER}", "  ")
-	Send( $mail_BodyMess)
-
-
-Sleep(3000)
-
-EndFunc
-
-Func ClickNewEmail()
-	Local $x=0,$y=0
-	Local $search
-
-	MouseMove(@DesktopWidth/2 , @DesktopHeight/2)
-	Sleep(2000)
-	$search = _ImageSearch(@ScriptDir&'\newEmailBtn.bmp',1, $x, $y, 0)
-
-	ConsoleWrite("step 1"  & @CRLF)
-	;MsgBox(0, "Location", "x = " & $x & " & y= " & $y)
-	if $search = 1 then
-		ConsoleWrite("step 2"  & @CRLF)
-		MouseMove ( $x , $y )
-		;MouseClick($MOUSE_CLICK_LEFT)
-		MouseClick($MOUSE_CLICK_LEFT, $x, $y ,1)
-	EndIf
-
-	Sleep(500)
-	WinWait("Untitled - Message (HTML) ", "", 2)
-	WinSetState("Untitled - Message (HTML) ",  "", @SW_MAXIMIZE)
-
-
-	;WinWaitActive("[CLASS:DirectUIHWND]")
-	Sleep(3000)
-
-EndFunc
-
 Func ClickInsightIcon()
 ;Move mouse over insight icon so it has status hover (darker background)
-	WinGetHandle("Untitled - Message (HTML) ")
+	;WinGetHandle("Untitled - Message (HTML) ")
 	Local $x1=0, $y1=0
 	Local $x2=0, $y2=0
 	Local $search
@@ -152,8 +187,8 @@ Func ClickInsightIcon()
 	$x1 = ($x1 * 100) / 125
 	$y1 = ($y1 * 100) / 125
 	If $search = 1 then
-		ConsoleWrite("found insight icon "  & @CRLF)
-		ConsoleWrite("position x1 and y1 = " & $x1 & " | "  & $y1 & @CRLF)
+		;ConsoleWrite("found insight icon "  & @CRLF)
+		;ConsoleWrite("position x1 and y1 = " & $x1 & " | "  & $y1 & @CRLF)
 		MouseMove ( $x1 , $y1 )
 		MouseClick($MOUSE_CLICK_LEFT, $x1, $y1 ,1)
 		Sleep(2000)
@@ -173,22 +208,23 @@ Func ClickInsightIcon()
 
 EndFunc
 
+#EndRegion
 
 
+
+#Region This part is to convert date time to name screenshot
 Func ShowDateTime()
-	ConsoleWrite("date = " & _NowDate() & " time = " & _NowTime(5)	)
+	;ConsoleWrite("date = " & _NowDate() & " time = " & _NowTime(5)	)
 EndFunc
 
-
-
 Func GetCurrentDateTimeForSaveFile()
-	ConsoleWrite("date = " & _NowDate() & @CRLF )
+	;ConsoleWrite("date = " & _NowDate() & @CRLF )
 	 $date = ChangeDateFormatForSaveFile(_NowDate())
-	ConsoleWrite("date formated = " & $date & @CRLF )
+	;ConsoleWrite("date formated = " & $date & @CRLF )
 
-	ConsoleWrite("time = " & _NowTime(5) & @CRLF )
+	;ConsoleWrite("time = " & _NowTime(5) & @CRLF )
 	 $time = ChangeTimeFormatForSaveFile(_NowTime(5))
-	ConsoleWrite("time formated = " & $time & @CRLF )
+	;ConsoleWrite("time formated = " & $time & @CRLF )
 
 	;ConsoleWrite("Date time formated = " & $date & "_" & $time & @CRLF)
 
@@ -214,6 +250,7 @@ Func ChangeTimeFormatForSaveFile($time)
     Return $ret2
 EndFunc
 
+#EndRegion
 
 
 Func TakeScreenShot($testcaseName)
@@ -224,27 +261,6 @@ Func TakeScreenShot($testcaseName)
 	 Local $filePath = $folder & "\" & $testcaseName & "_" & $dateTimeScr & ".jpg"
 	_ScreenCapture_Capture($filePath, True)
 	 EndIf
-
-;~ 	 	IF FileExists($folder) <> 1 Then
-;~ 			Local $filePath = $folder & "\" & $testcaseName & "_" & $dateTimeScr & ".jpg"
-;~ 			_ScreenCapture_Capture($filePath, True)
-;~ 		Else
-;~ 			$folder = DirCreate(@ScriptDir & "\Report_" &  @YEAR &@MON &@MDAY)
-;~ 			Local $filePath = $folder & "\" & $testcaseName & "_" & $dateTimeScr & ".jpg"
-;~ 			_ScreenCapture_Capture($filePath, True)
-;~ 		EndIf
-
-
-
-
-;~ 	IF FileExists($folder) <> 1 Then
-;~ 	$folder = DirCreate(@ScriptDir & "\Report_" &  @YEAR &@MON &@MDAY)
-;~ 	EndIf
-;~ 	Local $filePath = $folder & "\" & $testcaseName & "_" & $dateTimeScr & ".jpg"
-;~ 	_ScreenCapture_Capture($filePath, True)
-
-
-
 
 	;ShellExecute(@MyDocumentsDir & "\GDIPlus_Image1.jpg")
 
@@ -264,7 +280,7 @@ EndFunc
 
 
 
-
+;;;;Below code is from original source for testing calculator application
 Func GetViewMode()
 	IF ( ControlCommand( "Calculator", "", "Sta", "IsVisible", "" ) ) = 1 Then
 		Return $iScientific
