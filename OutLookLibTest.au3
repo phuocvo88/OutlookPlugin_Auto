@@ -24,6 +24,16 @@ Func TestTearDown()
 EndFunc
 
 
+Test("test sheet 1")
+	InputDataFromExcel("Sheet1")
+	;Sleep(2000)
+	;ClickInsightIcon()
+	$attachmentPath = TakeScreenShot("test sheet 1")
+ConsoleWrite("attachment path in Test: " & $attachmentPath & @CRLF)
+$result = AssertEqual(3.4,3.5, $attachmentPath)
+_RefreshSystemTray()
+Sleep(2000)
+
 
 Test("test sheet 2")
 	InputDataFromExcel("Sheet2")
@@ -32,7 +42,8 @@ Test("test sheet 2")
 	$attachmentPath = TakeScreenShot("test sheet 2")
 ConsoleWrite("attachment path in Test: " & $attachmentPath & @CRLF)
 $result = AssertEqual(3.4,3.5, $attachmentPath)
-
+_RefreshSystemTray()
+Sleep(2000)
 
 Test("test sheet 3")
 	InputDataFromExcel("Sheet3")
@@ -41,7 +52,17 @@ Test("test sheet 3")
 	$attachmentPath = TakeScreenShot("test sheet 3")
 ConsoleWrite("attachment path in Test: " & $attachmentPath & @CRLF)
 $result = AssertEqual(3.5,3.5, $attachmentPath)
-;Sleep(2000)
+Sleep(2000)
+
+
+
+
+
+
+
+
+
+
 ;FlushTestResults()
 ;Exit
 

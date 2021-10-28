@@ -23,32 +23,16 @@ Global $date, $time, $dateTime
 Global $testcaseName
 
 
-Func StartApp_old()
-
-
-	;this part will be put in set up
-	$iPID = Run("C:\Program Files\Microsoft Office\root\Office16\OUTLOOK.EXE")
-	ConsoleWrite("PID value = " & $iPID & @CRLF)
-	AutoItSetOption('MouseCoordMode', 0)
-	$oOutlook = WinWait("Inbox - P.Minh@aswhiteglobal.com - Outlook")
-	;Local $outLook = WinWait("Inbox - P.Minh@aswhiteglobal.com - Outlook")
-	WinSetState("Inbox - P.Minh@aswhiteglobal.com - Outlook", "", @SW_MAXIMIZE )
-	WinGetHandle("Inbox - P.Minh@aswhiteglobal.com - Outlook")
-	ConsoleWrite("launch ok"  & @CRLF)
-	Sleep(1500)
-
-
-EndFunc
-
 
 Func StartApp()
 	 $oOutlook = ObjCreate("Outlook.Application")
-	 ;$iPID = ProcessExists("OUTLOOK.EXE")
-	 ;ConsoleWrite("PID in start app = " & $iPID & @CRLF)
+	 Sleep(3000)
+	 $iPID = ProcessExists("OUTLOOK.EXE")
+	 ConsoleWrite("PID in start app = " & $iPID & @CRLF)
 	 $oMail = $oOutlook.CreateItem(0)
-    $oMail.Display
+	$oMail.Display
 
-
+Sleep(2000)
 EndFunc
 
 
@@ -57,7 +41,7 @@ Func CloseApp()
 	ConsoleWrite("PID gain in close app = " & $iPID & @CRLF)
 ;~ 	;ConsoleWrite("outlook process value gain in close app = " & $oOutlook & @CRLF)
 	ProcessClose( $iPID )
-	_WinAPI_TerminateProcess($iPID,0)
+	;_WinAPI_TerminateProcess($iPID,0)
 ;~ 	ProcessClose( $oOutlook )
 ;~ 	_WinAPI_TerminateProcess($oOutlook,0)
 	If ProcessWaitClose( $iPID, 10) = 1 Then
@@ -111,7 +95,7 @@ $oMail.Display
 Sleep(2000)
 	_Excel_BookClose($oWorkBook, False)
 	_Excel_Close($oExcel, False)
-
+Sleep(2000)
 EndFunc
 
 #Region Phuoc workaround to send data into Outlook mail composer
@@ -236,7 +220,7 @@ EndFunc
 ; dd.mm.yyyy --> yyyy-mm-dd
 Func ChangeDateFormatForSaveFile($date)
     If $date == '' Then Return ''
-    $ret = StringMid($date,7,4) & '-' & StringMid($date,4,2) & '-' & StringLeft($date,2)
+    $ret = StringMid($date,7,4) & '-' & StringLeft($date,2) & '-'  & StringMid($date,4,2)
 ;~  If StringLen($date) > 10 Then $ret &= StringMid($date,11) ; optionally including time
     Return $ret
 EndFunc
@@ -263,14 +247,73 @@ Func TakeScreenShot($testcaseName)
 	 EndIf
 
 	;ShellExecute(@MyDocumentsDir & "\GDIPlus_Image1.jpg")
-
+Sleep(2000)
 	return $filePath
 EndFunc
 
 
+#Region
+; ===================================================================
+; _RefreshSystemTray($nDealy = 1000)
+;
+; Removes any dead icons from the notification area.
+; Parameters:
+;   $nDelay - IN/OPTIONAL - The delay to wait for the notification area to expand with Windows XP's
+;       "Hide Inactive Icons" feature (In milliseconds).
+; Returns:
+;   Sets @error on failure:
+;       1 - Tray couldn't be found.
+;       2 - DllCall error.
+; ===================================================================
+Func _RefreshSystemTray($nDelay = 1000)
+; Save Opt settings
+    Local $oldMatchMode = Opt("WinTitleMatchMode", 4)
+    Local $oldChildMode = Opt("WinSearchChildren", 1)
+    Local $error = 0
+    Do; Pseudo loop
+        Local $hWnd = WinGetHandle("classname=TrayNotifyWnd")
+        If @error Then
+            $error = 1
+            ExitLoop
+        EndIf
 
+        Local $hControl = ControlGetHandle($hWnd, "", "Button1")
 
+    ; We're on XP and the Hide Inactive Icons button is there, so expand it
+        If $hControl <> "" And ControlCommand($hWnd, "", $hControl, "IsVisible") Then
+            ControlClick($hWnd, "", $hControl)
+            Sleep($nDelay)
+        EndIf
 
+        Local $posStart = MouseGetPos()
+        Local $posWin = WinGetPos($hWnd)
+
+        Local $y = $posWin[1]
+        While $y < $posWin[3] + $posWin[1]
+            Local $x = $posWin[0]
+            While $x < $posWin[2] + $posWin[0]
+                DllCall("user32.dll", "int", "SetCursorPos", "int", $x, "int", $y)
+                If @error Then
+                    $error = 2
+                    ExitLoop 3; Jump out of While/While/Do
+                EndIf
+                $x = $x + 8
+            WEnd
+            $y = $y + 8
+        WEnd
+        DllCall("user32.dll", "int", "SetCursorPos", "int", $posStart[0], "int", $posStart[1])
+    ; We're on XP so we need to hide the inactive icons again.
+        If $hControl <> "" And ControlCommand($hWnd, "", $hControl, "IsVisible") Then
+            ControlClick($hWnd, "", $hControl)
+        EndIf
+    Until 1
+
+; Restore Opt settings
+    Opt("WinTitleMatchMode", $oldMatchMode)
+    Opt("WinSearchChildren", $oldChildMode)
+    SetError($error)
+EndFunc; _RefreshSystemTray()
+#EndRegion
 
 
 

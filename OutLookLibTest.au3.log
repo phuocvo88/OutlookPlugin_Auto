@@ -1,7 +1,8 @@
 
-(2) Tests (2) Total Assertions (1) Pass (1) Fail
-Total Time: 19.06 seconds
+(3) Tests (3) Total Assertions (1) Pass (2) Fail
+Total Time: 61.16 seconds
 
 ASSERTION	MESSAGE
-1               Error in test sheet 2 -> See attachment for more details: E:\Work\Outlook Plugin\OutLookPlugin_auto\Report_20211027\test sheet 2_2021-27-10_16-15-55.jpg
-2               Test is PASSED: test sheet 3 -> See attachment for more details: E:\Work\Outlook Plugin\OutLookPlugin_auto\Report_20211027\test sheet 3_2021-27-10_16-16-03.jpg
+1               Error in test sheet 1 -> See attachment for more details: E:\Work\Outlook Plugin\OutLookPlugin_auto\Report_20211028\test sheet 1_2021-10-28_08-21-54.jpg
+2               Error in test sheet 2 -> See attachment for more details: E:\Work\Outlook Plugin\OutLookPlugin_auto\Report_20211028\test sheet 2_2021-10-28_08-22-15.jpg
+3               Test is PASSED: test sheet 3 -> See attachment for more details: E:\Work\Outlook Plugin\OutLookPlugin_auto\Report_20211028\test sheet 3_2021-10-28_08-22-36.jpg

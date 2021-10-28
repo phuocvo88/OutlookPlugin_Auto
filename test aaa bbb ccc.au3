@@ -1,19 +1,14 @@
-#include <Excel.au3>
+#include <Date.au3>
 
-$oExcel = _Excel_Open()
-$oWorkbook = _Excel_BookOpen($oExcel, @ScriptDir & "\InputData.xlsx")
-$oRange = $oWorkbook.ActiveSheet.Range("B5").Select
-$oExcel.CopyObjectsWithCells = True
-$oExcel.Selection.Copy
+$nowDate = _NowDate()
+ConsoleWrite("now date = " & $nowDate & @CRLF)
 
-$oOutlook = ObjCreate("Outlook.Application")
-$oMail = $oOutlook.CreateItem(0)
-
-$oMail.Display
-$oMail.To = "sample@example.com"
-$oMail.Subject = "Sample Subject"
-$oWordEditor = $oOutlook.ActiveInspector.wordEditor
-$oMail.Body = "Hello" & @CRLF & "Please find charts above." & @CRLF & @CRLF & "Regards Subz"
-$oWordEditor.Range(0, 0).Select
-$oWordEditor.Application.Selection.Paste
-$oMail.Display
+$date = ChangeDateFormatForSaveFile(_NowDate())
+ConsoleWrite("converted date = " & $date & @CRLF)
+; dd.mm.yyyy --> yyyy-mm-dd
+Func ChangeDateFormatForSaveFile($date)
+    If $date == '' Then Return ''
+    $ret = StringMid($date,7,4) & '-' & StringLeft($date,2) & '-'  & StringMid($date,4,2)
+;~  If StringLen($date) > 10 Then $ret &= StringMid($date,11) ; optionally including time
+    Return $ret
+EndFunc

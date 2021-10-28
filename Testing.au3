@@ -21,9 +21,9 @@ Func Test( $testName )
 
 	$sCurrentTestName = $testName
 
-;~ 	If $iTestCount > 1 Then
-;~ 		Call ("TestTearDown" )
-;~ 	EndIf
+	If $iTestCount > 1 Then
+		Call ("TestTearDown" )
+	EndIf
 
 Sleep(3000)
 	Call( "TestSetup" )
@@ -88,6 +88,7 @@ Func FlushTestResults()
 		ReportTestInfo( "ASSERTION" & @TAB & "MESSAGE" )
 		ReportTestInfo( $aResultsMessages )
 	EndIf
+
 EndFunc
 
 Func DoTestPass($path)
