@@ -1,0 +1,155 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Function _OL_ItemBulk</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <link href="../css/default.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<h1>Function Reference</h1>
+<font size="+1">_OL_ItemBulk</font>
+<hr size="2">
+<p>Bulk copy/delete/move items (contact, appointment ...) to a target folder.<br></p>
+
+<p class="codeheader">
+#Include &lt;OutlookEX.au3&gt;<br>
+_OL_ItemBulk($oOL, $aItems, $sSourceStore, $oTargetFolder, $iAction[, $iStartRow = 1[, $iIDColumn = 0[, $iFlags = 0]]])<br>
+</p>
+<p>&nbsp;</p>
+
+<p><b>Parameters</b></p>
+<table border="1" width="100%" cellspacing="0" cellpadding="3" bordercolor="#C0C0C0">
+  <tr>
+    <td width="15%">$oOL</td>
+    <td width="85%">Outlook object returned by a preceding call to _OL_Open()</td>
+  </tr>
+  <tr>
+   <td>$aItems</td>
+   <td>1D or 2D array. Can be zero or one based (depends on parameter $iStartRow).</td>
+  </tr>
+  <tr>
+   <td>$sSourceStore</td>
+   <td>StoreID (string) of the source store where the items reside. Ignored if all items are specified as objects</td>
+  </tr>
+  <tr>
+   <td>$oTargetFolder</td>
+   <td>Target folder object as returned by _OL_FolderAccess. Ignored for $iAction = 2 (delete), for $iAction = 1 (copy) if set to Default creates the copies in the source folder</td>
+  </tr>
+  <tr>
+   <td>$iAction</td>
+   <td>Method to process the items with. Can be one of the following values:<br>
+       1 - Copy the items to the same or a different folder<br>
+       2 - Delete the items<br>
+       3 - Move the items to another folder</td>
+  </tr>
+  <tr>
+   <td>$iStartRow</td>
+   <td>	<b>[optional]</b> Index (zero based) of the first row to process (default = 1)</td>
+  </tr>
+  <tr>
+   <td>$iIDColumn</td>
+   <td>	<b>[optional]</b> Index (zero based) of the column holding the EntryID or object of the item. Ignored for 1D arrays (default = 0)</td>
+  </tr>
+  <tr>
+   <td>$iFlags</td>
+   <td>	<b>[optional]</b> Processing flags. Any of the following combinations are valid:<br>
+       1 - Ignore errors - move on to the next item (default = stop processing and return with errors)</td>
+  </tr>
+</table>
+
+<p>&nbsp;</p>
+
+<p><b>Return Value</b></p>
+Success: 1 or, if $iFlags = 1, a two-dimensional array with the same number of rows as $aItems that holds the error code and the COM error for each corresponding row of $aItems<br>
+Failure: 0 and sets @error:<br>
+&nbsp;&nbsp;&nbsp; 1 - $oTargetFolder is not an object<br>
+&nbsp;&nbsp;&nbsp; 2 - Error deleting the specified item. @extended is set to the COM error<br>
+&nbsp;&nbsp;&nbsp; 3 - Error moving the created copy to the specified folder. @extended is set to the COM error<br>
+&nbsp;&nbsp;&nbsp; 4 - Error creating a copy of the specified item. @extended is set to the COM error<br>
+&nbsp;&nbsp;&nbsp; 5 - Error moving the item to the target folder. @extended is set to the COM error<br>
+&nbsp;&nbsp;&nbsp; 6 - No or an invalid item has been specified. @extended is set to the COM error<br>
+&nbsp;&nbsp;&nbsp; 7 - Errors have occurred during processing of $aItems. @extended is set to the number of errors<br>
+<p>&nbsp;</p>
+
+<p><b>Remarks</b></p>
+With one call you can only process items from a single store.<br>
+This function is made for speed with reduced error checking. Use _OL_ItemCopy, _OL_ItemDelete or _OL_ItemMove for more detailed error checking.<br>
+<br>
+<p>&nbsp;</p>
+
+<p><b>Related</b></p>
+
+<p>&nbsp;</p>
+
+<p><b>Example</b></p>
+<p class="codebox">
+<br>
+<span><span class="S11">#include</span><span class="S0"> </span><span class="S7">&lt;OutlookEX.au3&gt;</span><br>
+<br>
+<span class="S1">; *****************************************************************************</span><br>
+<span class="S1">; Create test environment</span><br>
+<span class="S1">; *****************************************************************************</span><br>
+<span class="S5">Global</span><span class="S0"> </span><span class="S9">$oOutlook</span><span class="S0"> </span><span class="S8">=</span><span class="S0"> _OL_Open</span><span class="S8">()</span><br>
+<span class="S5">If</span><span class="S0"> </span><span class="S6">@error</span><span class="S0"> </span><span class="S8">&lt;&gt;</span><span class="S0"> </span><span class="S3">0</span><span class="S0"> </span><span class="S5">Then</span><span class="S0"> </span><span class="S5">Exit</span><span class="S0"> </span><span class="S4">MsgBox</span><span class="S8">(</span><span class="S3">16</span><span class="S8">,</span><span class="S0"> </span><span class="S7">"OutlookEX UDF"</span><span class="S8">,</span><span class="S0"> </span><span class="S7">"Error creating a connection to Outlook. @error = "</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S6">@error</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S7">", @extended = "</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S6">@extended</span><span class="S8">)</span><br>
+<br>
+<span class="S1">; Global $Result = _OL_TestEnvironmentCreate($oOutlook)</span><br>
+<span class="S1">; If @error &lt;&gt; 0 Then Exit MsgBox(16, "OutlookEX UDF - Manage Test Environment", "Error creating the test environment. @error = " &amp; @error &amp; ", @extended = " &amp; @extended)</span><br>
+<br>
+<span class="S1">; *****************************************************************************</span><br>
+<span class="S1">; Example 1</span><br>
+<span class="S1">; Find a mail item in the specified folder and create 20 copies in the same folder</span><br>
+<span class="S1">; Measure the time needed when using _OL_ItemCopy and _OL_ItemBulk</span><br>
+<span class="S1">; _OL_ItemBulk returns errors as</span><br>
+<span class="S1">; *****************************************************************************</span><br>
+<span class="S5">Global</span><span class="S0"> </span><span class="S9">$aFolder</span><span class="S0"> </span><span class="S8">=</span><span class="S0"> _OL_FolderAccess</span><span class="S8">(</span><span class="S9">$oOutlook</span><span class="S8">,</span><span class="S0"> </span><span class="S7">"*\Outlook-UDF-Test\SourceFolder\Mail"</span><span class="S8">)</span><br>
+<span class="S5">Global</span><span class="S0"> </span><span class="S9">$aOL_Item</span><span class="S0"> </span><span class="S8">=</span><span class="S0"> _OL_ItemFind</span><span class="S8">(</span><span class="S9">$oOutlook</span><span class="S8">,</span><span class="S0"> </span><span class="S9">$aFolder</span><span class="S8">[</span><span class="S3">1</span><span class="S8">],</span><span class="S0"> </span><span class="S9">$olMail</span><span class="S8">,</span><span class="S0"> </span><span class="S7">""</span><span class="S8">,</span><span class="S0"> </span><span class="S7">""</span><span class="S8">,</span><span class="S0"> </span><span class="S7">""</span><span class="S8">,</span><span class="S0"> </span><span class="S7">"EntryID"</span><span class="S8">)</span><br>
+<span class="S5">If</span><span class="S0"> </span><span class="S9">$aOL_Item</span><span class="S8">[</span><span class="S3">0</span><span class="S8">][</span><span class="S3">0</span><span class="S8">]</span><span class="S0"> </span><span class="S8">=</span><span class="S0"> </span><span class="S3">0</span><span class="S0"> </span><span class="S5">Then</span><span class="S0"> </span><span class="S5">Exit</span><span class="S0"> </span><span class="S4">MsgBox</span><span class="S8">(</span><span class="S3">16</span><span class="S8">,</span><span class="S0"> </span><span class="S7">"OutlookEX UDF: _OL_ItemBulk Example Script"</span><span class="S8">,</span><span class="S0"> </span><span class="S7">"Could not find a mail item in folder '*\Outlook-UDF-Test\SourceFolder\Mail'. @error = "</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S6">@error</span><span class="S8">)</span><br>
+<span class="S5">ReDim</span><span class="S0"> </span><span class="S9">$aOL_Item</span><span class="S8">[</span><span class="S3">22</span><span class="S8">][</span><span class="S3">1</span><span class="S8">]</span><br>
+<span class="S1">; #cs</span><br>
+<span class="S1">; Use the item object instead of the EntryID</span><br>
+<span class="S9">$aOL_Item</span><span class="S8">[</span><span class="S3">1</span><span class="S8">][</span><span class="S3">0</span><span class="S8">]</span><span class="S0"> </span><span class="S8">=</span><span class="S0"> _OL_ItemGet</span><span class="S8">(</span><span class="S9">$oOutlook</span><span class="S8">,</span><span class="S0"> </span><span class="S9">$aOL_Item</span><span class="S8">[</span><span class="S3">1</span><span class="S8">][</span><span class="S3">0</span><span class="S8">],</span><span class="S0"> </span><span class="S5">Default</span><span class="S8">,</span><span class="S0"> </span><span class="S8">-</span><span class="S3">1</span><span class="S8">)</span><br>
+<span class="S5">For</span><span class="S0"> </span><span class="S9">$i</span><span class="S0"> </span><span class="S8">=</span><span class="S0"> </span><span class="S3">1</span><span class="S0"> </span><span class="S5">to</span><span class="S0"> </span><span class="S3">20</span><br>
+<span class="S0">&nbsp; &nbsp; </span><span class="S9">$aOL_Item</span><span class="S8">[</span><span class="S9">$i</span><span class="S8">+</span><span class="S3">1</span><span class="S8">][</span><span class="S3">0</span><span class="S8">]</span><span class="S0"> </span><span class="S8">=</span><span class="S0"> </span><span class="S9">$aOL_Item</span><span class="S8">[</span><span class="S9">$i</span><span class="S8">][</span><span class="S3">0</span><span class="S8">]</span><br>
+<span class="S5">Next</span><br>
+<br>
+<span class="S5">Global</span><span class="S0"> </span><span class="S9">$iTime</span><span class="S0"> </span><span class="S8">=</span><span class="S0"> </span><span class="S4">TimerInit</span><span class="S8">()</span><br>
+<span class="S5">for</span><span class="S0"> </span><span class="S9">$i</span><span class="S0"> </span><span class="S8">=</span><span class="S0"> </span><span class="S3">1</span><span class="S0"> </span><span class="S5">to</span><span class="S0"> </span><span class="S3">20</span><br>
+<span class="S0">&nbsp; &nbsp; _OL_ItemCopy</span><span class="S8">(</span><span class="S9">$oOutlook</span><span class="S8">,</span><span class="S0"> </span><span class="S9">$aOL_Item</span><span class="S8">[</span><span class="S9">$i</span><span class="S8">][</span><span class="S3">0</span><span class="S8">])</span><br>
+<span class="S5">Next</span><br>
+<span class="S4">MsgBox</span><span class="S8">(</span><span class="S3">64</span><span class="S8">,</span><span class="S0"> </span><span class="S7">"OutlookEX UDF: _OL_ItemBulk Example Script"</span><span class="S8">,</span><span class="S0"> </span><span class="S7">"Mails successfully copied using _OL_ItemCopy! It took "</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S4">TimerDiff</span><span class="S8">(</span><span class="S9">$iTime</span><span class="S8">)</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S7">" milliseconds."</span><span class="S8">)</span><br>
+<span class="S1">; #ce</span><br>
+<br>
+<span class="S1">; #cs</span><br>
+<span class="S1">; Copy</span><br>
+<span class="S9">$aFolder</span><span class="S0"> </span><span class="S8">=</span><span class="S0"> _OL_FolderAccess</span><span class="S8">(</span><span class="S9">$oOutlook</span><span class="S8">,</span><span class="S0"> </span><span class="S7">"*\Outlook-UDF-Test\SourceFolder\Mail\Ziel"</span><span class="S8">)</span><br>
+<span class="S5">Global</span><span class="S0"> </span><span class="S9">$iFlag</span><span class="S0"> </span><span class="S8">=</span><span class="S0"> </span><span class="S3">1</span><br>
+<span class="S9">$iTime</span><span class="S0"> </span><span class="S8">=</span><span class="S0"> </span><span class="S4">TimerInit</span><span class="S8">()</span><br>
+<span class="S5">Global</span><span class="S0"> </span><span class="S9">$aErrors</span><span class="S0"> </span><span class="S8">=</span><span class="S0"> _OL_ItemBulk</span><span class="S8">(</span><span class="S9">$oOutlook</span><span class="S8">,</span><span class="S0"> </span><span class="S9">$aOL_Item</span><span class="S8">,</span><span class="S0"> </span><span class="S5">Default</span><span class="S8">,</span><span class="S0"> </span><span class="S9">$aFolder</span><span class="S8">[</span><span class="S3">1</span><span class="S8">],</span><span class="S0"> </span><span class="S3">1</span><span class="S8">,</span><span class="S0"> </span><span class="S5">Default</span><span class="S8">,</span><span class="S0"> </span><span class="S5">Default</span><span class="S8">,</span><span class="S0"> </span><span class="S9">$iFlag</span><span class="S8">)</span><br>
+<span class="S5">If</span><span class="S0"> </span><span class="S6">@error</span><span class="S0"> </span><span class="S8">&lt;&gt;</span><span class="S0"> </span><span class="S3">0</span><span class="S0"> </span><span class="S5">Then</span><br>
+<span class="S0">&nbsp; &nbsp; </span><span class="S4">MsgBox</span><span class="S8">(</span><span class="S3">16</span><span class="S8">,</span><span class="S0"> </span><span class="S7">"OutlookEX UDF: _OL_ItemBulk Example Script"</span><span class="S8">,</span><span class="S0"> </span><span class="S7">"Error copying specified items. @error = "</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S6">@error</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S7">", @extended = "</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S6">@extended</span><span class="S8">)</span><br>
+<span class="S0">&nbsp; &nbsp; </span><span class="S5">If</span><span class="S0"> </span><span class="S9">$iFlag</span><span class="S0"> </span><span class="S8">=</span><span class="S0"> </span><span class="S3">1</span><span class="S0"> </span><span class="S5">Then</span><span class="S0"> </span><span class="S15">_ArrayDisplay</span><span class="S8">(</span><span class="S9">$aErrors</span><span class="S8">)</span><br>
+<span class="S5">Else</span><br>
+<span class="S0">&nbsp; &nbsp; </span><span class="S4">MsgBox</span><span class="S8">(</span><span class="S3">64</span><span class="S8">,</span><span class="S0"> </span><span class="S7">"OutlookEX UDF: _OL_ItemBulk Example Script"</span><span class="S8">,</span><span class="S0"> </span><span class="S7">"Mails successfully copied using _OL_ItemBulk ! It took "</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S4">TimerDiff</span><span class="S8">(</span><span class="S9">$iTime</span><span class="S8">)</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S7">" milliseconds."</span><span class="S8">)</span><br>
+<span class="S5">EndIf</span><br>
+<span class="S1">; #ce</span><br>
+<br>
+<span class="S2">#cs</span><br>
+<span class="S2">; Move</span><br>
+<span class="S2">$aFolder = _OL_FolderAccess($oOutlook, "*\Outlook-UDF-Test\SourceFolder\Mail\Ziel")</span><br>
+<span class="S2">Global $iFlag = 1</span><br>
+<span class="S2">$iTime = TimerInit()</span><br>
+<span class="S2">Global $aErrors = _OL_ItemBulk($oOutlook, $aOL_Item, Default, $aFolder[1], 3, Default, Default, $iFlag)</span><br>
+<span class="S2">If @error &lt;&gt; 0 Then</span><br>
+<span class="S2">&nbsp; &nbsp; MsgBox(16, "OutlookEX UDF: _OL_ItemBulk Example Script", "Error moving specified items. @error = " &amp; @error &amp; ", @extended = " &amp; @extended)</span><br>
+<span class="S2">&nbsp; &nbsp; If $iFlag = 1 Then _ArrayDisplay($aErrors)</span><br>
+<span class="S2">Else</span><br>
+<span class="S2">&nbsp; &nbsp; MsgBox(64, "OutlookEX UDF: _OL_ItemBulk Example Script", "Mails successfully moved using _OL_ItemBulk ! It took " &amp; TimerDiff($iTime) &amp; " milliseconds.")</span><br>
+<span class="S2">EndIf</span><br>
+<span class="S2">#ce</span><br>
+<br>
+<span class="S0">_OL_Close</span><span class="S8">(</span><span class="S9">$oOutlook</span><span class="S8">)</span></span><br>
+<p>&nbsp;</p>
+
+</body>
+</html>

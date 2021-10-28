@@ -1,0 +1,90 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Function _OL_ItemOpen</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <link href="../css/default.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<h1>Function Reference</h1>
+<font size="+1">_OL_ItemOpen</font>
+<hr size="2">
+<p>Opens a shared item from a specified path or URL or a shared folder referenced through a URL or a file name.<br></p>
+
+<p class="codeheader">
+#Include &lt;OutlookEX.au3&gt;<br>
+_OL_ItemOpen($oOL, $sPath[, $iType = 0[, $sName = ""[, $bDownloadAttachments = True[, $bUseTTL = True]]]])<br>
+</p>
+<p>&nbsp;</p>
+
+<p><b>Parameters</b></p>
+<table border="1" width="100%" cellspacing="0" cellpadding="3" bordercolor="#C0C0C0">
+  <tr>
+    <td width="15%">$oOL</td>
+    <td width="85%">Outlook object returned by a preceding call to _OL_Open()</td>
+  </tr>
+  <tr>
+   <td>$sPath</td>
+   <td>Path or URL of the shared item to be opened</td>
+  </tr>
+  <tr>
+   <td>$iType</td>
+   <td>	<b>[optional]</b> Specifies the type of shared item to open: 0 = Shared item, 1 = Shared folder (default = 0)</td>
+  </tr>
+  <tr>
+   <td>$sName</td>
+   <td>	<b>[optional]</b> The name of the RSS feed or Webcal calendar (default = "").</td>
+  </tr>
+  <tr>
+   <td>$bDownloadAttachments</td>
+   <td>	<b>[optional]</b> Indicates whether to download enclosures (for RSS feeds) or attachments (for Webcal calendars) (default = True).</td>
+  </tr>
+  <tr>
+   <td>$bUseTTL</td>
+   <td>	<b>[optional]</b> Indicates whether the Time To Live (TTL) setting in an RSS feed or WebCal calendar should be used (default = True).</td>
+  </tr>
+</table>
+
+<p>&nbsp;</p>
+
+<p><b>Return Value</b></p>
+Success: Item object representing the appropriate Outlook item or folder object that represents the shared folder<br>
+Failure: Returns 0 and sets @error:<br>
+&nbsp;&nbsp;&nbsp; 1 - $iType is invalid<br>
+&nbsp;&nbsp;&nbsp; 2 - Error opening the specified shared item (OpenSharedItem method). @extended is set to the COM error<br>
+&nbsp;&nbsp;&nbsp; 3 - Error opening the specified shared folder (OpenSharedFolder method). @extended is set to the COM error<br>
+<p>&nbsp;</p>
+
+<p><b>Remarks</b></p>
+OpenSharedItem:<br>
+OpenSharedItem is used to open iCalendar appointment (.ics) files, vCard (.vcf) files, and Outlook message (.msg) files.<br>
+The type of object returned by this method depends on the type of shared item opened, as described in the following table.<br>
+<br>
+SHARED ITEM TYPE OUTLOOK ITEM<br>
+iCalendar appointment (.ics) file AppointmentItem<br>
+vCard (.vcf) file ContactItem<br>
+Outlook message (.msg) file Type corresponds to the type of the item that was saved as the .msg file<br>
+<br>
+OpenSharedFolder:<br>
+Opens a shared folder referenced through a URL or file name. OpenSharedFolder is used to open iCalendar calendar (.ics) files and accesses the following shared folder types:<br>
+<br>
+SHARED FOLDER TYPE PATH OR URL<br>
+Webcal calendars webcal:// mysite / mycalendar<br>
+RSS feeds feed:// mysite / myfeed<br>
+Microsoft SharePoint Foundation folders stssync:// mysite / myfolder<br>
+iCalendar calendar .ics files<br>
+vCard contact .vcf files<br>
+Outlook message .msg files<br>
+<br>
+This method does not support iCalendar appointment (.ics) files. To open iCalendar appointment files, use the OpenSharedItem method of the NameSpace object.<br>
+See: https://epdf.pub/programming-applications-for-microsoft-office-outlook-2007.html<br>
+<br>
+<p>&nbsp;</p>
+
+<p><b>Related</b></p>
+
+<p>&nbsp;</p>
+
+</body>
+</html>

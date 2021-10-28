@@ -1,0 +1,127 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Function _OL_ItemAccessGet</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <link href="../css/default.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<h1>Function Reference</h1>
+<font size="+1">_OL_ItemAccessGet</font>
+<hr size="2">
+<p>Returns the clients access level to the object or the operations that are available to the client for the object.<br></p>
+
+<p class="codeheader">
+#Include &lt;OutlookEX.au3&gt;<br>
+_OL_ItemAccessGet($oObject[, $iFlag=1])<br>
+</p>
+<p>&nbsp;</p>
+
+<p><b>Parameters</b></p>
+<table border="1" width="100%" cellspacing="0" cellpadding="3" bordercolor="#C0C0C0">
+  <tr>
+    <td width="15%">$oObject</td>
+    <td width="85%">Folder or item object to retrieve the access information from</td>
+  </tr>
+  <tr>
+   <td>$iFlag</td>
+   <td>	<b>[optional]</b> Specifies the access information to return. 1=ACCESS LEVEL, 2=ACCESS (default = 1)</td>
+  </tr>
+</table>
+
+<p>&nbsp;</p>
+
+<p><b>Return Value</b></p>
+Success: Integer (for $iFlag=1) or bitmask of flags (for $iFlag=2). Please see Remarks.<br>
+Failure: Returns 0 and sets @error:<br>
+&nbsp;&nbsp;&nbsp; 1 - $iFlag is invalid<br>
+&nbsp;&nbsp;&nbsp; 2 - Error returned when trying to get the PropertyAccessor. @extended is set to the COM error code<br>
+&nbsp;&nbsp;&nbsp; 3 - Error when retrieving the ACCESS LEVEL property. @extended is set to the COM error code<br>
+&nbsp;&nbsp;&nbsp; 4 - Error when retrieving the ACCESS property. @extended is set to the COM error code<br>
+<p>&nbsp;</p>
+
+<p><b>Remarks</b></p>
+ACCESS LEVEL property:<br>
+This property is read-only for the client. This property does not apply to Folder objects and<br>
+Logon objects (a Server object that provides access to a private mailbox or a public folder).<br>
+Returned values are:<br>
+0x00000000 - Read-Only<br>
+0x00000001 - Modify<br>
+<br>
+ACCESS property:<br>
+This property is read-only for the client. It is a bitwise OR of zero or more values from the following table:<br>
+0x00000001 (MAPI_ACCESS_MODIFY) - Write<br>
+0x00000002 (MAPI_ACCESS_READ) - Read<br>
+0x00000004 (MAPI_ACCESS_DELETE) - Delete<br>
+0x00000008 (MAPI_ACCESS_CREATE_HIERARCHY) - Create subfolders in the folder hierarchy<br>
+0x00000010 (MAPI_ACCESS_CREATE_CONTENTS) - Create content messages<br>
+0x00000020 (MAPI_ACCESS_CREATE_ASSOCIATED) - Create associated content messages<br>
+<br>
+The MAPI_ACCESS_DELETE, MAPI_ACCESS_MODIFY, and MAPI_ACCESS_READ flags are found on folder and message objects.<br>
+The MAPI_ACCESS_CREATE_ASSOCIATED, MAPI_ACCESS_CREATE_CONTENTS, and MAPI_ACCESS_CREATE_HIERARCHY flags are found on folder objects only.<br>
+<br>
+Find details at:<br>
+GENERAL: https://stackoverflow.com/questions/25289525/how-to-get-the-permission-level-on-a-calendar-in-outlook-2010-vb-addon<br>
+PR_ACCESS_LEVEL: https://docs.microsoft.com/en-us/office/client-developer/outlook/mapi/pidtagaccesslevel-canonical-property<br>
+PR_ACCESS: https://docs.microsoft.com/en-us/office/client-developer/outlook/mapi/pidtagaccess-canonical-property<br>
+PR_ACL_TABLE: https://docs.microsoft.com/en-us/office/client-developer/outlook/mapi/pidtagaccesscontrollisttable-canonical-property<br>
+<br>
+<p>&nbsp;</p>
+
+<p><b>Related</b></p>
+
+<p>&nbsp;</p>
+
+<p><b>Example</b></p>
+<p class="codebox">
+<br>
+<span><span class="S11">#include</span><span class="S0"> </span><span class="S7">&lt;OutlookEX.au3&gt;</span><br>
+<br>
+<span class="S5">Global</span><span class="S0"> </span><span class="S9">$oOL</span><span class="S0"> </span><span class="S8">=</span><span class="S0"> _OL_Open</span><span class="S8">()</span><br>
+<span class="S5">Global</span><span class="S0"> </span><span class="S9">$aFolder</span><span class="S0"> </span><span class="S8">=</span><span class="S0"> _OL_FolderAccess</span><span class="S8">(</span><span class="S9">$oOL</span><span class="S8">,</span><span class="S0"> </span><span class="S5">Default</span><span class="S8">,</span><span class="S0"> </span><span class="S9">$olFolderInbox</span><span class="S8">)</span><br>
+<span class="S5">If</span><span class="S0"> </span><span class="S6">@error</span><span class="S0"> </span><span class="S5">Then</span><span class="S0"> </span><span class="S5">Exit</span><span class="S0"> </span><span class="S4">MsgBox</span><span class="S8">(</span><span class="S9">$MB_ICONERROR</span><span class="S8">,</span><span class="S0"> </span><span class="S7">"OutlookEX UDF: _OL_ItemAccessGet Example Script"</span><span class="S8">,</span><span class="S0"> </span><span class="S7">"Error accessing the Inbox. @error = "</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S6">@error</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S7">", @extended = "</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S6">@extended</span><span class="S8">)</span><br>
+<span class="S4">Sleep</span><span class="S8">(</span><span class="S3">4000</span><span class="S8">)</span><br>
+<span class="S1">; *****************************************************************************</span><br>
+<span class="S1">; Example 1</span><br>
+<span class="S1">; Get the access rights for the users Inbox</span><br>
+<span class="S1">; *****************************************************************************</span><br>
+<span class="S9">$iAccess</span><span class="S0"> </span><span class="S8">=</span><span class="S0"> _OL_ItemAccessGet</span><span class="S8">(</span><span class="S9">$aFolder</span><span class="S8">[</span><span class="S3">1</span><span class="S8">],</span><span class="S0"> </span><span class="S3">1</span><span class="S8">)</span><br>
+<span class="S5">If</span><span class="S0"> </span><span class="S6">@error</span><span class="S0"> </span><span class="S5">Then</span><span class="S0"> </span><span class="S5">Exit</span><span class="S0"> </span><span class="S4">MsgBox</span><span class="S8">(</span><span class="S9">$MB_ICONERROR</span><span class="S8">,</span><span class="S0"> </span><span class="S7">"OutlookEX UDF: _OL_ItemAccessGet Example Script"</span><span class="S8">,</span><span class="S0"> </span><span class="S7">"Error retrieving the ACCESS_LEVEL property of the Inbox. @error = "</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S6">@error</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S7">", @extended = "</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S6">@extended</span><span class="S8">)</span><br>
+<span class="S4">MsgBox</span><span class="S8">(</span><span class="S9">$MB_ICONINFORMATION</span><span class="S8">,</span><span class="S0"> </span><span class="S7">"_OL_ItemAccessGet Example Script"</span><span class="S8">,</span><span class="S0"> </span><span class="S7">"ACCESS LEVEL Property of the Inbox: "</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S9">$iAccess</span><span class="S8">)</span><br>
+<br>
+<span class="S9">$iAccess</span><span class="S0"> </span><span class="S8">=</span><span class="S0"> _OL_ItemAccessGet</span><span class="S8">(</span><span class="S9">$aFolder</span><span class="S8">[</span><span class="S3">1</span><span class="S8">],</span><span class="S0"> </span><span class="S3">2</span><span class="S8">)</span><br>
+<span class="S5">If</span><span class="S0"> </span><span class="S6">@error</span><span class="S0"> </span><span class="S5">Then</span><span class="S0"> </span><span class="S5">Exit</span><span class="S0"> </span><span class="S4">MsgBox</span><span class="S8">(</span><span class="S9">$MB_ICONERROR</span><span class="S8">,</span><span class="S0"> </span><span class="S7">"OutlookEX UDF: _OL_ItemAccessGet Example Script"</span><span class="S8">,</span><span class="S0"> </span><span class="S7">"Error retrieving the ACCESS property of the Inbox. @error = "</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S6">@error</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S7">", @extended = "</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S6">@extended</span><span class="S8">)</span><br>
+<span class="S5">Local</span><span class="S0"> </span><span class="S9">$sMessage</span><span class="S0"> </span><span class="S8">=</span><span class="S0"> </span><span class="S7">""</span><br>
+<span class="S5">If</span><span class="S0"> </span><span class="S4">BitAND</span><span class="S8">(</span><span class="S9">$iAccess</span><span class="S8">,</span><span class="S0"> </span><span class="S3">0x00000001</span><span class="S8">)</span><span class="S0"> </span><span class="S8">=</span><span class="S0"> </span><span class="S3">0x00000001</span><span class="S0"> </span><span class="S5">Then</span><span class="S0"> </span><span class="S9">$sMessage</span><span class="S0"> </span><span class="S8">&amp;=</span><span class="S0"> </span><span class="S7">" &nbsp;0x1: Write"</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S6">@CRLF</span><br>
+<span class="S5">If</span><span class="S0"> </span><span class="S4">BitAND</span><span class="S8">(</span><span class="S9">$iAccess</span><span class="S8">,</span><span class="S0"> </span><span class="S3">0x00000002</span><span class="S8">)</span><span class="S0"> </span><span class="S8">=</span><span class="S0"> </span><span class="S3">0x00000002</span><span class="S0"> </span><span class="S5">Then</span><span class="S0"> </span><span class="S9">$sMessage</span><span class="S0"> </span><span class="S8">&amp;=</span><span class="S0"> </span><span class="S7">" &nbsp;0x2: Read"</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S6">@CRLF</span><br>
+<span class="S5">If</span><span class="S0"> </span><span class="S4">BitAND</span><span class="S8">(</span><span class="S9">$iAccess</span><span class="S8">,</span><span class="S0"> </span><span class="S3">0x00000004</span><span class="S8">)</span><span class="S0"> </span><span class="S8">=</span><span class="S0"> </span><span class="S3">0x00000004</span><span class="S0"> </span><span class="S5">Then</span><span class="S0"> </span><span class="S9">$sMessage</span><span class="S0"> </span><span class="S8">&amp;=</span><span class="S0"> </span><span class="S7">" &nbsp;0x4: Delete"</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S6">@CRLF</span><br>
+<span class="S5">If</span><span class="S0"> </span><span class="S4">BitAND</span><span class="S8">(</span><span class="S9">$iAccess</span><span class="S8">,</span><span class="S0"> </span><span class="S3">0x00000008</span><span class="S8">)</span><span class="S0"> </span><span class="S8">=</span><span class="S0"> </span><span class="S3">0x00000008</span><span class="S0"> </span><span class="S5">Then</span><span class="S0"> </span><span class="S9">$sMessage</span><span class="S0"> </span><span class="S8">&amp;=</span><span class="S0"> </span><span class="S7">" &nbsp;0x8: Create subfolders in the folder hierarchy"</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S6">@CRLF</span><br>
+<span class="S5">If</span><span class="S0"> </span><span class="S4">BitAND</span><span class="S8">(</span><span class="S9">$iAccess</span><span class="S8">,</span><span class="S0"> </span><span class="S3">0x00000010</span><span class="S8">)</span><span class="S0"> </span><span class="S8">=</span><span class="S0"> </span><span class="S3">0x00000010</span><span class="S0"> </span><span class="S5">Then</span><span class="S0"> </span><span class="S9">$sMessage</span><span class="S0"> </span><span class="S8">&amp;=</span><span class="S0"> </span><span class="S7">" &nbsp;0x10: Create content messages"</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S6">@CRLF</span><br>
+<span class="S5">If</span><span class="S0"> </span><span class="S4">BitAND</span><span class="S8">(</span><span class="S9">$iAccess</span><span class="S8">,</span><span class="S0"> </span><span class="S3">0x00000020</span><span class="S8">)</span><span class="S0"> </span><span class="S8">=</span><span class="S0"> </span><span class="S3">0x00000020</span><span class="S0"> </span><span class="S5">Then</span><span class="S0"> </span><span class="S9">$sMessage</span><span class="S0"> </span><span class="S8">&amp;=</span><span class="S0"> </span><span class="S7">" &nbsp;0x20: Create associated content messages"</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S6">@CRLF</span><br>
+<span class="S4">MsgBox</span><span class="S8">(</span><span class="S9">$MB_ICONINFORMATION</span><span class="S8">,</span><span class="S0"> </span><span class="S7">"_OL_ItemAccessGet Example Script"</span><span class="S8">,</span><span class="S0"> </span><span class="S7">"ACCESS Property of the Inbox: "</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S6">@CRLF</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S9">$sMessage</span><span class="S8">)</span><br>
+<br>
+<span class="S1">; *****************************************************************************</span><br>
+<span class="S1">; Example 2</span><br>
+<span class="S1">; Get the access rights of the first item in the users Inbox</span><br>
+<span class="S1">; *****************************************************************************</span><br>
+<span class="S9">$iAccess</span><span class="S0"> </span><span class="S8">=</span><span class="S0"> _OL_ItemAccessGet</span><span class="S8">(</span><span class="S9">$aFolder</span><span class="S8">[</span><span class="S3">1</span><span class="S8">].</span><span class="S14">Items</span><span class="S8">.</span><span class="S14">Item</span><span class="S8">(</span><span class="S3">1</span><span class="S8">),</span><span class="S0"> </span><span class="S3">1</span><span class="S8">)</span><br>
+<span class="S5">If</span><span class="S0"> </span><span class="S6">@error</span><span class="S0"> </span><span class="S5">Then</span><span class="S0"> </span><span class="S5">Exit</span><span class="S0"> </span><span class="S4">MsgBox</span><span class="S8">(</span><span class="S9">$MB_ICONERROR</span><span class="S8">,</span><span class="S0"> </span><span class="S7">"OutlookEX UDF: _OL_ItemAccessGet Example Script"</span><span class="S8">,</span><span class="S0"> </span><span class="S7">"Error retrieving the ACCESS_LEVEL property of the first item in the Inbox. @error = "</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S6">@error</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S7">", @extended = "</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S6">@extended</span><span class="S8">)</span><br>
+<span class="S4">MsgBox</span><span class="S8">(</span><span class="S9">$MB_ICONINFORMATION</span><span class="S8">,</span><span class="S0"> </span><span class="S7">"_OL_ItemAccessGet Example Script"</span><span class="S8">,</span><span class="S0"> </span><span class="S7">"ACCESS LEVEL Property of the first item in the Inbox: "</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S9">$iAccess</span><span class="S8">)</span><br>
+<br>
+<span class="S9">$iAccess</span><span class="S0"> </span><span class="S8">=</span><span class="S0"> _OL_ItemAccessGet</span><span class="S8">(</span><span class="S9">$aFolder</span><span class="S8">[</span><span class="S3">1</span><span class="S8">].</span><span class="S14">Items</span><span class="S8">.</span><span class="S14">Item</span><span class="S8">(</span><span class="S3">1</span><span class="S8">),</span><span class="S0"> </span><span class="S3">2</span><span class="S8">)</span><br>
+<span class="S5">If</span><span class="S0"> </span><span class="S6">@error</span><span class="S0"> </span><span class="S5">Then</span><span class="S0"> </span><span class="S5">Exit</span><span class="S0"> </span><span class="S4">MsgBox</span><span class="S8">(</span><span class="S9">$MB_ICONERROR</span><span class="S8">,</span><span class="S0"> </span><span class="S7">"OutlookEX UDF: _OL_ItemAccessGet Example Script"</span><span class="S8">,</span><span class="S0"> </span><span class="S7">"Error retrieving the ACCESS property of the first item in the Inbox. @error = "</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S6">@error</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S7">", @extended = "</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S6">@extended</span><span class="S8">)</span><br>
+<span class="S5">Local</span><span class="S0"> </span><span class="S9">$sMessage</span><span class="S0"> </span><span class="S8">=</span><span class="S0"> </span><span class="S7">""</span><br>
+<span class="S5">If</span><span class="S0"> </span><span class="S4">BitAND</span><span class="S8">(</span><span class="S9">$iAccess</span><span class="S8">,</span><span class="S0"> </span><span class="S3">0x00000001</span><span class="S8">)</span><span class="S0"> </span><span class="S8">=</span><span class="S0"> </span><span class="S3">0x00000001</span><span class="S0"> </span><span class="S5">Then</span><span class="S0"> </span><span class="S9">$sMessage</span><span class="S0"> </span><span class="S8">&amp;=</span><span class="S0"> </span><span class="S7">" &nbsp;0x1: Write"</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S6">@CRLF</span><br>
+<span class="S5">If</span><span class="S0"> </span><span class="S4">BitAND</span><span class="S8">(</span><span class="S9">$iAccess</span><span class="S8">,</span><span class="S0"> </span><span class="S3">0x00000002</span><span class="S8">)</span><span class="S0"> </span><span class="S8">=</span><span class="S0"> </span><span class="S3">0x00000002</span><span class="S0"> </span><span class="S5">Then</span><span class="S0"> </span><span class="S9">$sMessage</span><span class="S0"> </span><span class="S8">&amp;=</span><span class="S0"> </span><span class="S7">" &nbsp;0x2: Read"</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S6">@CRLF</span><br>
+<span class="S5">If</span><span class="S0"> </span><span class="S4">BitAND</span><span class="S8">(</span><span class="S9">$iAccess</span><span class="S8">,</span><span class="S0"> </span><span class="S3">0x00000004</span><span class="S8">)</span><span class="S0"> </span><span class="S8">=</span><span class="S0"> </span><span class="S3">0x00000004</span><span class="S0"> </span><span class="S5">Then</span><span class="S0"> </span><span class="S9">$sMessage</span><span class="S0"> </span><span class="S8">&amp;=</span><span class="S0"> </span><span class="S7">" &nbsp;0x4: Delete"</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S6">@CRLF</span><br>
+<span class="S5">If</span><span class="S0"> </span><span class="S4">BitAND</span><span class="S8">(</span><span class="S9">$iAccess</span><span class="S8">,</span><span class="S0"> </span><span class="S3">0x00000008</span><span class="S8">)</span><span class="S0"> </span><span class="S8">=</span><span class="S0"> </span><span class="S3">0x00000008</span><span class="S0"> </span><span class="S5">Then</span><span class="S0"> </span><span class="S9">$sMessage</span><span class="S0"> </span><span class="S8">&amp;=</span><span class="S0"> </span><span class="S7">" &nbsp;0x8: Create subfolders in the folder hierarchy"</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S6">@CRLF</span><br>
+<span class="S5">If</span><span class="S0"> </span><span class="S4">BitAND</span><span class="S8">(</span><span class="S9">$iAccess</span><span class="S8">,</span><span class="S0"> </span><span class="S3">0x00000010</span><span class="S8">)</span><span class="S0"> </span><span class="S8">=</span><span class="S0"> </span><span class="S3">0x00000010</span><span class="S0"> </span><span class="S5">Then</span><span class="S0"> </span><span class="S9">$sMessage</span><span class="S0"> </span><span class="S8">&amp;=</span><span class="S0"> </span><span class="S7">" &nbsp;0x10: Create content messages"</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S6">@CRLF</span><br>
+<span class="S5">If</span><span class="S0"> </span><span class="S4">BitAND</span><span class="S8">(</span><span class="S9">$iAccess</span><span class="S8">,</span><span class="S0"> </span><span class="S3">0x00000020</span><span class="S8">)</span><span class="S0"> </span><span class="S8">=</span><span class="S0"> </span><span class="S3">0x00000020</span><span class="S0"> </span><span class="S5">Then</span><span class="S0"> </span><span class="S9">$sMessage</span><span class="S0"> </span><span class="S8">&amp;=</span><span class="S0"> </span><span class="S7">" &nbsp;0x20: Create associated content messages"</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S6">@CRLF</span><br>
+<span class="S4">MsgBox</span><span class="S8">(</span><span class="S9">$MB_ICONINFORMATION</span><span class="S8">,</span><span class="S0"> </span><span class="S7">"_OL_ItemAccessGet Example Script"</span><span class="S8">,</span><span class="S0"> </span><span class="S7">"ACCESS Property of the first item in the Inbox: "</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S6">@CRLF</span><span class="S0"> </span><span class="S8">&amp;</span><span class="S0"> </span><span class="S9">$sMessage</span><span class="S8">)</span><br>
+<br>
+<span class="S0">_OL_Close</span><span class="S8">(</span><span class="S9">$oOL</span><span class="S8">)</span></span><br>
+<p>&nbsp;</p>
+
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Function _OL_VersionInfo</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <link href="../css/default.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<h1>Function Reference</h1>
+<font size="+1">_OL_VersionInfo</font>
+<hr size="2">
+<p>Returns a string holding version/date of OutlookEX_Base, OutlookEX and OutlookEX_GUI.<br></p>
+
+<p class="codeheader">
+#Include &lt;OutlookEX_Base.au3&gt;<br>
+_OL_VersionInfo()<br>
+</p>
+<p>&nbsp;</p>
+
+<p><b>Parameters</b></p>
+<table border="1" width="100%" cellspacing="0" cellpadding="3" bordercolor="#C0C0C0">
+  <tr>
+    <td width="15%">None.</td>
+    <td width="85%"></td>
+  </tr>
+  <tr>
+   <td></td>
+   <td></td>
+  </tr>
+</table>
+
+<p>&nbsp;</p>
+
+<p><b>Return Value</b></p>
+Success: string holding version/date of OutlookEX_Base, OutlookEX and OutlookEX_GUI separated by @CRLF.<br>
+<p>&nbsp;</p>
+
+<p><b>Remarks</b></p>
+Example of the returned string: "OutlookEX_Base: 1.2.2.0 220-09-01 <@CRLF> OutlookEX: 1.6.3.0 2020-09-01"<br>
+<br>
+<p>&nbsp;</p>
+
+<p><b>Related</b></p>
+
+<p>&nbsp;</p>
+
+<p><b>Example</b></p>
+<p class="codebox">
+<br>
+<span><span class="S11">#include</span><span class="S0"> </span><span class="S7">&lt;OutlookEX.au3&gt;</span><br>
+<br>
+<span class="S1">;------------------------------------------------------------------------------------------------------------------------------------------------</span><br>
+<span class="S1">; Example 1 - Display the version info for this UDF</span><br>
+<span class="S1">;------------------------------------------------------------------------------------------------------------------------------------------------</span><br>
+<span class="S5">Global</span><span class="S0"> </span><span class="S9">$sVersionInfo</span><span class="S0"> </span><span class="S8">=</span><span class="S0"> _OL_VersionInfo</span><span class="S8">()</span><br>
+<span class="S4">MsgBox</span><span class="S8">(</span><span class="S9">$MB_ICONINFORMATION</span><span class="S8">,</span><span class="S0"> </span><span class="S7">"_OL_VersionInfo"</span><span class="S8">,</span><span class="S0"> </span><span class="S9">$sVersionInfo</span><span class="S8">)</span></span><br>
+<p>&nbsp;</p>
+
+</body>
+</html>

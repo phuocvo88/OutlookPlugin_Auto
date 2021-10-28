@@ -1,0 +1,167 @@
+<!--HTMHELP-->
+<html><head><style type="text/css">.funcheader{border: 1px solid black; background-color: #ffffaa; font-family: Courier New; padding: 4px; margin-bottom: 7px;}.description{font-style: italic; margin-bottom: 15px;}.gotoheader{float: right; color: black;}.variable{font-family: Courier New; color: #aa0000; font-weight: 800;}.macro{font-family: Courier New; color: #ff00ff; font-weight: 800;}.hex{font-family: Courier New; color: #ac00aa; font-style: italic;}.arrayindex{font-family: Courier New; color: #333333;}.optparam{opacity: 0.67;}body{font-family: Arial; background-color: #eeeeee;}a{text-decoration: none; color: blue;}a:hover{color: black;}hr{border-color: black;}h1{text-align: center;}h3{}h4{text-align: center;}</style><title>OutlookEx_Base.au3</title></head><h1 id="header">Dokumentation zu <i>OutlookEx_Base.au3</i></h1><h4><i>Erstellt mit <a target="_blank" href="https://autoit.de/thread/83359-htmhelp-automatische-udf-dokumentation-04-08-2015-1-1-0/?postID=667225#post667225">HTMHelp</a> &copy; Sebastian Walter</i></h4><h3>Funktionsliste</h3><ul><li><a href="#_OL_Open">_OL_Open</a></li>
+<li><a href="#_OL_Close">_OL_Close</a></li>
+<li><a href="#_OL_ErrorNotify">_OL_ErrorNotify</a></li>
+<li><a href="#_OL_TestEnvironmentCreate">_OL_TestEnvironmentCreate</a></li>
+<li><a href="#_OL_VersionInfo">_OL_VersionInfo</a></li>
+</ul><a href="#header" class="gotoheader">Nach oben</a><br/>
+<hr id="_OL_Open"/>
+<h3>_OL_Open</h3>
+<div class='description'>Opens a connection to Microsoft Outlook.</div>
+<div class="funcheader" >_OL_Open($bWarningClick = False, $sWarningProgram = "", $iWinCheckTime = 1000, $iCtrlCheckTime = 1000, $sProfileName = "", $sPassword = "")</div>
+<b>Parameterliste:</b> <span class="optparam"><br/>&emsp;&emsp;<span class="variable">$bWarningClick</span>      (Optional) -  If set to True a function will click away the Outlook security warning messages (default = False)</span>
+
+<span class="optparam"><br/>&emsp;&emsp;<span class="variable">$sWarningProgram</span>    (Optional) -  Complete path to the compiled WarningProgram, e.g.: "C:\OLext\_OL_Warnings.exe"</span>
+
+<br/>&emsp;&emsp;+ (default = <span class="macro">@ScriptDir</span> & "\_OL_Warnings.exe" which is part of this UDF)
+
+<span class="optparam"><br/>&emsp;&emsp;<span class="variable">$iWinCheckTime</span>      (Optional) -  Time in milliseconds to wait before a check for a warning window is performed (default = 1000 milliseconds = 1 second)</span>
+
+<span class="optparam"><br/>&emsp;&emsp;<span class="variable">$iCtrlCheckTime</span>     (Optional) -  How long, in milliseconds, we will wait before we check that the controls we click are enabled (default = 1000)</span>
+
+<span class="optparam"><br/>&emsp;&emsp;<span class="variable">$sProfileName</span>       (Optional) -  Name of the profile to be used for logon. The default profile will be used if none is specified (default = "")</span>
+
+<span class="optparam"><br/>&emsp;&emsp;<span class="variable">$sPassword</span>          (Optional) -  The password associated with the profile (default = "")</span><br/>
+<b>R&uuml;ckgabewert:</b> <br/>&emsp;&emsp;Success - New object identifier and sets <span class="macro">@extended</span>:
+
+<br/>&emsp;&emsp;&emsp;&emsp;0 - Outlook was not running. When using _OL_Open you need not to set parameter <span class="variable">$bForceClose</span> to True to stop the Outlook process (optional)
+
+<br/>&emsp;&emsp;&emsp;&emsp;1 - Outlook was already up and running. When using _OL_Open you have to set parameter <span class="variable">$bForceClose</span> to True to stop the Outlook process (optional)
+
+<br/>&emsp;&emsp;Failure - Returns 0 and sets <span class="macro">@error</span>:
+
+<br/>&emsp;&emsp;&emsp;&emsp;1  - Unable to create Outlook Object. <span class="macro">@extended</span> is set to the COM error code
+
+<br/>&emsp;&emsp;&emsp;&emsp;3  - <span class="variable">$bWarningClick</span> is invalid. Has to be True or False
+
+<br/>&emsp;&emsp;&emsp;&emsp;4  - <span class="variable">$iWinCheckTime</span> is invalid. Has to be an integer
+
+<br/>&emsp;&emsp;&emsp;&emsp;5  - File <span class="variable">$sWarningProgram</span> does not exist. Has to be an executable that can be startet using the run command
+
+<br/>&emsp;&emsp;&emsp;&emsp;6  - Run error when running <span class="variable">$sWarningProgram</span>. Please check <span class="macro">@extended</span> for more information
+
+<br/>&emsp;&emsp;&emsp;&emsp;7  - <span class="variable">$iCtrlCheckTime</span> is invalid. Has to be an integer
+
+<br/>&emsp;&emsp;&emsp;&emsp;8  - Unable to logon to the default profile. <span class="macro">@extended</span> is set to the COM error code
+
+<br/>&emsp;&emsp;&emsp;&emsp;9  - No profile has been configured or there is no default profile for Outlook
+
+<br/>&emsp;&emsp;&emsp;&emsp;10 - You specified a profile name to logon to but Outlook is already running<br/>
+<b>Kommentare:</b> Create your own <span class="variable">$sWarningProgram</span> Exe if the window title or messages have changed or are displayed in another language.
+
+<br/>&emsp;&emsp;If Outlook is already running a specified profile name is ignored because no logon is needed.<br/>
+<b>Autor:</b> Wooltown<br/>
+<a href="#header" class="gotoheader">Nach oben</a><br/>
+<hr id="_OL_Close"/>
+<h3>_OL_Close</h3>
+<div class='description'>Closes the connection to Microsoft Outlook.</div>
+<div class="funcheader" >_OL_Close(ByRef $oOL, $bForceClose = False)</div>
+<b>Parameterliste:</b> <br/>&emsp;&emsp;<span class="variable">$oOL</span>         - Outlook object returned by a preceding call to _OL_Open()
+
+<span class="optparam"><br/>&emsp;&emsp;<span class="variable">$bForceClose</span> (Optional) -  If True Outlook is closed even when it was running at _OL_Open time (default = False)</span><br/>
+<b>R&uuml;ckgabewert:</b> <br/>&emsp;&emsp;Success - Returns 1 and sets <span class="macro">@extended</span> to 1 if Outlook was already running
+
+<br/>&emsp;&emsp;Failure - Returns 0 and sets <span class="macro">@error</span>
+
+<br/>&emsp;&emsp;&emsp;&emsp;1 - Error with Session.Logoff. <span class="macro">@extended</span> is set to the COM error code
+
+<br/>&emsp;&emsp;&emsp;&emsp;2 - Error with Application.Quit. <span class="macro">@extended</span> is set to the COM error code<br/>
+<b>Kommentare:</b> If Outlook was already running when _OL_Open was called you have to use flag <span class="variable">$bForceClose</span> to close Outlook.
+
+<br/>&emsp;&emsp;If Outlook was already running when _OL_Open was called <span class="macro">@extended</span> is set to 1 to indicate this<br/>
+<b>Autor:</b> Wooltown<br/>
+<a href="#header" class="gotoheader">Nach oben</a><br/>
+<hr id="_OL_ErrorNotify"/>
+<h3>_OL_ErrorNotify</h3>
+<div class='description'>Sets or queries the debug level.</div>
+<div class="funcheader" >_OL_ErrorNotify($iDebug, $sDebugFile = "")</div>
+<b>Parameterliste:</b> <br/>&emsp;&emsp;<span class="variable">$iDebug</span>     - Debug level. Allowed values are:
+
+<br/>&emsp;&emsp;&emsp;&emsp;-1 - Return the current settings
+
+<br/>&emsp;&emsp;&emsp;&emsp;0  - Disable debugging
+
+<br/>&emsp;&emsp;&emsp;&emsp;1  - Enable debugging. Output the debug info to the console
+
+<br/>&emsp;&emsp;&emsp;&emsp;2  - Enable Debugging. Output the debug info to a MsgBox as <span class="variable">$MB_ICONERROR</span>
+
+<br/>&emsp;&emsp;&emsp;&emsp;3  - Enable Debugging. Output the debug info to a file defined by <span class="variable">$sDebugFile</span>
+
+<br/>&emsp;&emsp;&emsp;&emsp;4  - Enable Debugging. The COM errors will be handled (the script no longer crashes) without any output
+
+<span class="optparam"><br/>&emsp;&emsp;<span class="variable">$sDebugFile</span> (Optional) -  File to write the debugging info to if <span class="variable">$iDebug</span> = 3 (Default = <span class="macro">@ScriptDir</span> & "\Outlook_Debug.txt")</span><br/>
+<b>R&uuml;ckgabewert:</b> <br/>&emsp;&emsp;Success (for <span class="variable">$iDebug</span> =&gt; 0) - 1, sets <span class="macro">@extended</span> to:
+
+<br/>&emsp;&emsp;&emsp;&emsp;0 - The COM error handler for this UDF was already active
+
+<br/>&emsp;&emsp;&emsp;&emsp;1 - A COM error handler has been initialized for this UDF
+
+<br/>&emsp;&emsp;Success (for <span class="variable">$iDebug</span> = -1) - one based one-dimensional array with the following elements:
+
+<br/>&emsp;&emsp;&emsp;&emsp;1 - Debug level. Value from 0 to 3. Check parameter <span class="variable">$iDebug</span> for details
+
+<br/>&emsp;&emsp;&emsp;&emsp;2 - Debug file. File to write the debugging info to as defined by parameter <span class="variable">$sDebugFile</span>
+
+<br/>&emsp;&emsp;&emsp;&emsp;3 - True if the COM error handler has been defined for this UDF. False if debugging is set off or a COM error handler was already defined
+
+<br/>&emsp;&emsp;Failure - 0, sets <span class="macro">@error</span> to:
+
+<br/>&emsp;&emsp;&emsp;&emsp;1 - <span class="variable">$iDebug</span> is not an integer or &lt; -1 or &gt; 4
+
+<br/>&emsp;&emsp;&emsp;&emsp;2 - Installation of the custom error handler failed. <span class="macro">@extended</span> is set to the error code returned by ObjEvent
+
+<br/>&emsp;&emsp;&emsp;&emsp;3 - COM error handler already set to another function<br/>
+<b>Autor:</b> water<br/>
+<a href="#header" class="gotoheader">Nach oben</a><br/>
+<hr id="_OL_TestEnvironmentCreate"/>
+<h3>_OL_TestEnvironmentCreate</h3>
+<div class='description'>Deletes and recreates the OutlookEX UDF test environment.</div>
+<div class="funcheader" >_OL_TestEnvironmentCreate($oOL, $vDontAsk = "", $vDontDelete = "")</div>
+<b>Parameterliste:</b> <br/>&emsp;&emsp;<span class="variable">$oOL</span>         - Outlook object returned by a preceding call to _OL_Open()
+
+<span class="optparam"><br/>&emsp;&emsp;<span class="variable">$vDontAsk</span>    (Optional) -  Return error if folder already exists? 1 = no, 4 = yes, "" = read value from ini file</span>
+
+<span class="optparam"><br/>&emsp;&emsp;<span class="variable">$vDontDelete</span> (Optional) -  Delete test environment if it already exists? 1 = no, 4 = yes, "" = read value from ini file</span><br/>
+<b>R&uuml;ckgabewert:</b> <br/>&emsp;&emsp;Success - 1
+
+<br/>&emsp;&emsp;Failure - 0 and sets <span class="macro">@error</span>:
+
+<br/>&emsp;&emsp;&emsp;&emsp;1 - Folder *\Outlook-UDF-Test already exists and user denied to delete/recreate the testenvironment
+
+<br/>&emsp;&emsp;&emsp;&emsp;2 - Error deleting folder. <span class="macro">@extended</span> is <span class="macro">@error</span> as returned by _OL_FolderDelete
+
+<br/>&emsp;&emsp;&emsp;&emsp;3 - Error creating root source folder (*\Outlook-UDF-Test\SourceFolder). <span class="macro">@extended</span> is set to <span class="macro">@error</span> as returned by _OL_FolderCreate
+
+<br/>&emsp;&emsp;&emsp;&emsp;3xx - Error creating source folder. <span class="macro">@extended</span> is set to <span class="macro">@error</span> as returned by _OL_FolderCreate
+
+<br/>&emsp;&emsp;&emsp;&emsp;4 - Error creating root target folder (*\Outlook-UDF-Test\TargetFolder). <span class="macro">@extended</span> is set to <span class="macro">@error</span> as returned by _OL_FolderCreate
+
+<br/>&emsp;&emsp;&emsp;&emsp;4xx - Error creating target folder. <span class="macro">@extended</span> is set to <span class="macro">@error</span> as returned by _OL_FolderCreate
+
+<br/>&emsp;&emsp;&emsp;&emsp;5xx - Error creating item in source folder. <span class="macro">@extended</span> is set to <span class="macro">@error</span> as returned by _OL_&lt;itemtype&gt;Create
+
+<br/>&emsp;&emsp;&emsp;&emsp;6xx - Error creating item in target folder. <span class="macro">@extended</span> is set to <span class="macro">@error</span> as returned by _OL_&lt;itemtype&gt;Create<br/>
+<b>Kommentare:</b> The test environment consists of the following items:
+
+<br/>&emsp;&emsp;* Folder Outlook-UDF-Test, subfolders plus items
+
+<br/>&emsp;&emsp;* Group "Outlook-UDF-Test" in the Outlook bar
+
+<br/>&emsp;&emsp;* Shortcut int the "Outlook-UDF-Test" group in the Outlook bar
+
+<br/>&emsp;&emsp;* Category "Outlook-UDF-Test" in the Outlook bar
+
+<br/>&emsp;&emsp;* Mail signature "Outlook-UDF-Test"
+
+<br/>&emsp;&emsp;* PST "Outlook-UDF-Test" in "C:\temp\Outlook-UDF-Test.pst"<br/>
+<b>Autor:</b> water<br/>
+<a href="#header" class="gotoheader">Nach oben</a><br/>
+<hr id="_OL_VersionInfo"/>
+<h3>_OL_VersionInfo</h3>
+<div class='description'>Returns a string holding version/date of OutlookEX_Base, OutlookEX and OutlookEX_GUI.</div>
+<div class="funcheader" >_OL_VersionInfo()</div>
+<b>Parameterliste:</b> <br/>&emsp;&emsp;None<br/>
+<b>R&uuml;ckgabewert:</b> <br/>&emsp;&emsp;Success - string holding version/date of OutlookEX_Base, OutlookEX and OutlookEX_GUI separated by <span class="macro">@CRLF</span>.<br/>
+<b>Kommentare:</b> Example of the returned string: "OutlookEX_Base: 1.2.2.0 220-09-01 &lt;<span class="macro">@CRLF</span>&gt; OutlookEX: 1.6.3.0 2020-09-01"<br/>
+<b>Autor:</b> water<br/>
+</body></html>
