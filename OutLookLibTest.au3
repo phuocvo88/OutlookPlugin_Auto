@@ -3,7 +3,7 @@
 #include <FunctionLib.au3>
 
 Global $result
-Global $attachmentPath
+Global $attachmentPath, $screenshotPath
 
 HotKeySet("{ESC}","Quit") ;Press ESC key to quit
 
@@ -28,30 +28,36 @@ Test("test sheet 1")
 	InputDataFromExcel("Sheet1")
 	;Sleep(2000)
 	;ClickInsightIcon()
-	$attachmentPath = TakeScreenShot("test sheet 1")
-ConsoleWrite("attachment path in Test: " & $attachmentPath & @CRLF)
-$result = AssertEqual(3.4,3.5, $attachmentPath)
+	AddAttachmentToEmail( @ScriptDir & "\The_Outlook.jpg")
+	Sleep(1000)
+	$screenshotPath = TakeScreenShot("test sheet 1")
+ConsoleWrite("attachment path in Test: " & $screenshotPath & @CRLF)
+$result = AssertEqual(3.4,3.5, $screenshotPath)
 _RefreshSystemTray()
-Sleep(2000)
+Sleep(1000)
 
 
 Test("test sheet 2")
 	InputDataFromExcel("Sheet2")
 	;Sleep(2000)
 	;ClickInsightIcon()
-	$attachmentPath = TakeScreenShot("test sheet 2")
-ConsoleWrite("attachment path in Test: " & $attachmentPath & @CRLF)
-$result = AssertEqual(3.4,3.5, $attachmentPath)
+	AddAttachmentToEmail( @ScriptDir & "\The_Outlook.jpg")
+	Sleep(1000)
+	$screenshotPath = TakeScreenShot("test sheet 2")
+ConsoleWrite("attachment path in Test: " & $screenshotPath & @CRLF)
+$result = AssertEqual(3.4,3.5, $screenshotPath)
 _RefreshSystemTray()
-Sleep(2000)
+Sleep(1000)
 
 Test("test sheet 3")
 	InputDataFromExcel("Sheet3")
 	;Sleep(2000)
 	;ClickInsightIcon()
-	$attachmentPath = TakeScreenShot("test sheet 3")
-ConsoleWrite("attachment path in Test: " & $attachmentPath & @CRLF)
-$result = AssertEqual(3.5,3.5, $attachmentPath)
+	AddAttachmentToEmail( @ScriptDir & "\The_Outlook.jpg")
+	Sleep(1000)
+	$screenshotPath = TakeScreenShot("test sheet 3")
+ConsoleWrite("attachment path in Test: " & $screenshotPath & @CRLF)
+$result = AssertEqual(3.5,3.5, $screenshotPath)
 Sleep(2000)
 
 

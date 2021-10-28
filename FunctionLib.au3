@@ -26,13 +26,13 @@ Global $testcaseName
 
 Func StartApp()
 	 $oOutlook = ObjCreate("Outlook.Application")
-	 Sleep(3000)
+	 Sleep(1000)
 	 $iPID = ProcessExists("OUTLOOK.EXE")
 	 ConsoleWrite("PID in start app = " & $iPID & @CRLF)
 	 $oMail = $oOutlook.CreateItem(0)
 	$oMail.Display
 
-Sleep(2000)
+Sleep(1000)
 EndFunc
 
 
@@ -96,6 +96,11 @@ Sleep(2000)
 	_Excel_BookClose($oWorkBook, False)
 	_Excel_Close($oExcel, False)
 Sleep(2000)
+EndFunc
+
+Func AddAttachmentToEmail($attachmentFullPath)
+	$oMail.attachments.add ($attachmentFullPath)
+
 EndFunc
 
 #Region Phuoc workaround to send data into Outlook mail composer
