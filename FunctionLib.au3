@@ -9,6 +9,9 @@
 #include <WinAPIFiles.au3>
 #include <Excel.au3>
 #include <ScreenCapture.au3>
+#include "_ImageSearch_UDF.au3"
+
+
 
 AutoItSetOption('MouseCoordMode', 0)
 Global $iPID, $oOutlook, $oMail
@@ -34,7 +37,6 @@ Func StartApp()
 
 Sleep(1000)
 EndFunc
-
 
 Func CloseApp()
 	$iPID = ProcessExists("OUTLOOK.EXE")
@@ -100,8 +102,235 @@ EndFunc
 
 Func AddAttachmentToEmail($attachmentFullPath)
 	$oMail.attachments.add ($attachmentFullPath)
+	MouseMove(@DesktopWidth/3 , @DesktopHeight/3)
+	Sleep(1000)
+EndFunc
+
+Func FindPlugInStatus()
+
+
+	Local $x3=0,$y3=0
+	Local $searchIconRed
+
+	MouseMove(@DesktopWidth/2 , @DesktopHeight/2)
+	Sleep(3000)
+	ConsoleWrite("full path icon= "&  @ScriptDir&'\statusIcon\status_Red.bmp' & @CRLF)
+	$searchIconRed = _ImageSearch(@ScriptDir&'\statusIcon\status_Red.bmp',1, $x3, $y3, 0)
+	;convert position to zoom level 125%
+	$x3 = ($x3 * 100) / 125
+	$y3 = ($y3 * 100) / 125
+	ConsoleWrite("searchIconred value = " & $searchIconRed & @CRLF)
+	ConsoleWrite("x value = " & $x3 & "y value = " & $y3 & @CRLF)
+
+Sleep(5000)
+	if $searchIconRed = 1 then
+		ConsoleWrite("icon red is found"  & @CRLF)
+		MsgBox(0, "icon red is found at: ", "x = " & $x3 & " & y= " & $y3)
+		MouseMove ( $x3 , $y3 )
+		;MouseClick($MOUSE_CLICK_LEFT)
+		MouseClick($MOUSE_CLICK_LEFT, $x3, $y3 ,1)
+	Else
+		MsgBox(0, "icon red is not found at: ", "x = " & $x3 & " & y= " & $y3)
+	EndIf
+
 
 EndFunc
+
+
+Func findicon3()
+	Local $_Image_1 = @ScriptDir & "\statusIcon\noMatch.bmp"
+	Local $search1 = _ImageSearchByPath($_Image_1)
+Local $x= ($search1[1] * 100) / 125, $y= ($search1[2] * 100) / 125
+
+	If $search1[0] = 1 Then
+		MsgBox(0, 'Ex 1 - Success', 'Image found:' & " X=" & $x & " Y=" & $y & @CRLF & $_Image_1)
+	Else
+		MsgBox(48, 'Ex 1 - Failed', 'Image not found')
+	EndIf
+
+	ConsoleWrite("step 1"  & @CRLF)
+	;MsgBox(0, "Location", "x = " & $x & " & y= " & $y)
+	if $search1[0] = 1  then
+		ConsoleWrite("step 2"  & @CRLF)
+		MouseMove ( $x , $y )
+		;MouseClick($MOUSE_CLICK_LEFT)
+		MouseClick($MOUSE_CLICK_LEFT, $x, $y ,1)
+		Sleep(5000)
+	EndIf
+
+EndFunc
+
+Func IsIconRed()
+	Local $_Image_1 = @ScriptDir & "\statusIcon\red.bmp"
+	Local $return = _ImageSearchByPath($_Image_1)
+	Local $x= ($return[1] * 100) / 125, $y= ($return[2] * 100) / 125
+
+	If $return[0] = 1 Then
+		MouseMove ( $x , $y )
+		Return True
+	Else
+		Return False
+	EndIf
+EndFunc
+
+Func IsIconGreen()
+	Local $_Image_1 = @ScriptDir & "\statusIcon\green.bmp"
+	Local $return = _ImageSearchByPath($_Image_1)
+	Local $x= ($return[1] * 100) / 125, $y= ($return[2] * 100) / 125
+
+	If $return[0] = 1 Then
+		MouseMove ( $x , $y )
+		Return True
+	Else
+		Return False
+	EndIf
+EndFunc
+
+Func IsIconYellow()
+	Local $_Image_1 = @ScriptDir & "\statusIcon\noMatch.bmp"
+	Local $return = _ImageSearchByPath($_Image_1)
+	Local $x= ($return[1] * 100) / 125, $y= ($return[2] * 100) / 125
+
+	If $return[0] = 1 Then
+		MouseMove ( $x , $y )
+		Return True
+	Else
+		Return False
+	EndIf
+EndFunc
+
+
+
+#Region This part is to convert date time to name screenshot
+Func ShowDateTime()
+	;ConsoleWrite("date = " & _NowDate() & " time = " & _NowTime(5)	)
+EndFunc
+
+Func GetCurrentDateTimeForSaveFile()
+	ConsoleWrite("date = " & _NowCalcDate() & @CRLF )
+	 $date = ChangeDateFormatForSaveFile(_NowCalcDate())
+	ConsoleWrite("date formated = " & $date & @CRLF )
+
+	;ConsoleWrite("time = " & _NowTime(5) & @CRLF )
+	 $time = ChangeTimeFormatForSaveFile(_NowTime(5))
+	;ConsoleWrite("time formated = " & $time & @CRLF )
+
+
+	;ConsoleWrite("Date time formated = " & $date & "_" & $time & @CRLF)
+
+
+	$dateTimeFormated = $date & "_" & $time
+	ConsoleWrite("date and time = " & $dateTimeFormated & @CRLF)
+	return $dateTimeFormated
+EndFunc
+
+; dd.mm.yyyy --> yyyy-mm-dd
+Func ChangeDateFormatForSaveFile($date)
+    ;If $date == '' Then Return ''
+    ;$ret = StringMid($date,7,4) & '-' & StringLeft($date,2) & '-'  & StringMid($date,4,2)
+;~  If StringLen($date) > 10 Then $ret &= StringMid($date,11) ; optionally including time
+	;Return $ret
+
+	If $date == '' Then Return ''
+    $ret = StringLeft($date,4) & '-' & StringMid($date,6,2) & '-'  & StringMid($date,9,2)
+;~  If StringLen($date) > 10 Then $ret &= StringMid($date,11) ; optionally including time
+    Return $ret
+
+
+EndFunc
+
+
+Func ChangeTimeFormatForSaveFile($time)
+    If $time == '' Then Return ''
+    $ret = StringReplace($time,":","")
+	$ret2 = StringMid($ret,1,2) & "-" & StringMid($ret,3,2)  & "-" & StringMid($ret,5,2)
+
+    Return $ret2
+EndFunc
+
+#EndRegion
+
+Func TakeScreenShot($testcaseName)
+	 $dateTimeScr = GetCurrentDateTimeForSaveFile()
+	 Local $folder = @ScriptDir & "\Report_" & @YEAR &@MON &@MDAY
+
+	 If DirCreate($folder) Then
+	 Local $filePath = $folder & "\" & $testcaseName & "_" & $dateTimeScr & ".jpg"
+	_ScreenCapture_Capture($filePath, True)
+	 EndIf
+
+	;ShellExecute(@MyDocumentsDir & "\GDIPlus_Image1.jpg")
+Sleep(2000)
+	return $filePath
+EndFunc
+
+
+
+
+
+
+#Region  _RefreshSystemTray($nDealy = 1000)
+; ===================================================================
+; _RefreshSystemTray($nDealy = 1000)
+;
+; Removes any dead icons from the notification area.
+; Parameters:
+;   $nDelay - IN/OPTIONAL - The delay to wait for the notification area to expand with Windows XP's
+;       "Hide Inactive Icons" feature (In milliseconds).
+; Returns:
+;   Sets @error on failure:
+;       1 - Tray couldn't be found.
+;       2 - DllCall error.
+; ===================================================================
+Func _RefreshSystemTray($nDelay = 1000)
+; Save Opt settings
+    Local $oldMatchMode = Opt("WinTitleMatchMode", 4)
+    Local $oldChildMode = Opt("WinSearchChildren", 1)
+    Local $error = 0
+    Do; Pseudo loop
+        Local $hWnd = WinGetHandle("classname=TrayNotifyWnd")
+        If @error Then
+            $error = 1
+            ExitLoop
+        EndIf
+
+        Local $hControl = ControlGetHandle($hWnd, "", "Button1")
+
+    ; We're on XP and the Hide Inactive Icons button is there, so expand it
+        If $hControl <> "" And ControlCommand($hWnd, "", $hControl, "IsVisible") Then
+            ControlClick($hWnd, "", $hControl)
+            Sleep($nDelay)
+        EndIf
+
+        Local $posStart = MouseGetPos()
+        Local $posWin = WinGetPos($hWnd)
+
+        Local $y = $posWin[1]
+        While $y < $posWin[3] + $posWin[1]
+            Local $x = $posWin[0]
+            While $x < $posWin[2] + $posWin[0]
+                DllCall("user32.dll", "int", "SetCursorPos", "int", $x, "int", $y)
+                If @error Then
+                    $error = 2
+                    ExitLoop 3; Jump out of While/While/Do
+                EndIf
+                $x = $x + 8
+            WEnd
+            $y = $y + 8
+        WEnd
+        DllCall("user32.dll", "int", "SetCursorPos", "int", $posStart[0], "int", $posStart[1])
+    ; We're on XP so we need to hide the inactive icons again.
+        If $hControl <> "" And ControlCommand($hWnd, "", $hControl, "IsVisible") Then
+            ControlClick($hWnd, "", $hControl)
+        EndIf
+    Until 1
+
+; Restore Opt settings
+    Opt("WinTitleMatchMode", $oldMatchMode)
+    Opt("WinSearchChildren", $oldChildMode)
+    SetError($error)
+EndFunc; _RefreshSystemTray()
+#EndRegion
 
 #Region Phuoc workaround to send data into Outlook mail composer
 Func ClickNewEmail()
@@ -197,127 +426,6 @@ Func ClickInsightIcon()
 
 EndFunc
 
-#EndRegion
-
-
-
-#Region This part is to convert date time to name screenshot
-Func ShowDateTime()
-	;ConsoleWrite("date = " & _NowDate() & " time = " & _NowTime(5)	)
-EndFunc
-
-Func GetCurrentDateTimeForSaveFile()
-	;ConsoleWrite("date = " & _NowDate() & @CRLF )
-	 $date = ChangeDateFormatForSaveFile(_NowDate())
-	;ConsoleWrite("date formated = " & $date & @CRLF )
-
-	;ConsoleWrite("time = " & _NowTime(5) & @CRLF )
-	 $time = ChangeTimeFormatForSaveFile(_NowTime(5))
-	;ConsoleWrite("time formated = " & $time & @CRLF )
-
-	;ConsoleWrite("Date time formated = " & $date & "_" & $time & @CRLF)
-
-	$dateTimeFormated = $date & "_" & $time
-	ConsoleWrite("date and time = " & $dateTimeFormated & @CRLF)
-	return $dateTimeFormated
-EndFunc
-
-; dd.mm.yyyy --> yyyy-mm-dd
-Func ChangeDateFormatForSaveFile($date)
-    If $date == '' Then Return ''
-    $ret = StringMid($date,7,4) & '-' & StringLeft($date,2) & '-'  & StringMid($date,4,2)
-;~  If StringLen($date) > 10 Then $ret &= StringMid($date,11) ; optionally including time
-    Return $ret
-EndFunc
-
-
-Func ChangeTimeFormatForSaveFile($time)
-    If $time == '' Then Return ''
-    $ret = StringReplace($time,":","")
-	$ret2 = StringMid($ret,1,2) & "-" & StringMid($ret,3,2)  & "-" & StringMid($ret,5,2)
-
-    Return $ret2
-EndFunc
-
-#EndRegion
-
-
-Func TakeScreenShot($testcaseName)
-	 $dateTimeScr = GetCurrentDateTimeForSaveFile()
-	 Local $folder = @ScriptDir & "\Report_" & @YEAR &@MON &@MDAY
-
-	 If DirCreate($folder) Then
-	 Local $filePath = $folder & "\" & $testcaseName & "_" & $dateTimeScr & ".jpg"
-	_ScreenCapture_Capture($filePath, True)
-	 EndIf
-
-	;ShellExecute(@MyDocumentsDir & "\GDIPlus_Image1.jpg")
-Sleep(2000)
-	return $filePath
-EndFunc
-
-
-#Region
-; ===================================================================
-; _RefreshSystemTray($nDealy = 1000)
-;
-; Removes any dead icons from the notification area.
-; Parameters:
-;   $nDelay - IN/OPTIONAL - The delay to wait for the notification area to expand with Windows XP's
-;       "Hide Inactive Icons" feature (In milliseconds).
-; Returns:
-;   Sets @error on failure:
-;       1 - Tray couldn't be found.
-;       2 - DllCall error.
-; ===================================================================
-Func _RefreshSystemTray($nDelay = 1000)
-; Save Opt settings
-    Local $oldMatchMode = Opt("WinTitleMatchMode", 4)
-    Local $oldChildMode = Opt("WinSearchChildren", 1)
-    Local $error = 0
-    Do; Pseudo loop
-        Local $hWnd = WinGetHandle("classname=TrayNotifyWnd")
-        If @error Then
-            $error = 1
-            ExitLoop
-        EndIf
-
-        Local $hControl = ControlGetHandle($hWnd, "", "Button1")
-
-    ; We're on XP and the Hide Inactive Icons button is there, so expand it
-        If $hControl <> "" And ControlCommand($hWnd, "", $hControl, "IsVisible") Then
-            ControlClick($hWnd, "", $hControl)
-            Sleep($nDelay)
-        EndIf
-
-        Local $posStart = MouseGetPos()
-        Local $posWin = WinGetPos($hWnd)
-
-        Local $y = $posWin[1]
-        While $y < $posWin[3] + $posWin[1]
-            Local $x = $posWin[0]
-            While $x < $posWin[2] + $posWin[0]
-                DllCall("user32.dll", "int", "SetCursorPos", "int", $x, "int", $y)
-                If @error Then
-                    $error = 2
-                    ExitLoop 3; Jump out of While/While/Do
-                EndIf
-                $x = $x + 8
-            WEnd
-            $y = $y + 8
-        WEnd
-        DllCall("user32.dll", "int", "SetCursorPos", "int", $posStart[0], "int", $posStart[1])
-    ; We're on XP so we need to hide the inactive icons again.
-        If $hControl <> "" And ControlCommand($hWnd, "", $hControl, "IsVisible") Then
-            ControlClick($hWnd, "", $hControl)
-        EndIf
-    Until 1
-
-; Restore Opt settings
-    Opt("WinTitleMatchMode", $oldMatchMode)
-    Opt("WinSearchChildren", $oldChildMode)
-    SetError($error)
-EndFunc; _RefreshSystemTray()
 #EndRegion
 
 

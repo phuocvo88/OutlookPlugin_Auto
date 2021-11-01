@@ -4,6 +4,12 @@
 
 Global $result
 Global $attachmentPath, $screenshotPath
+Global $test1 = "test Red icon"
+Global $test2 = "test Yellow icon"
+Global $test3 = "test Green icon"
+Global $test4 = "test attachments"
+
+
 
 HotKeySet("{ESC}","Quit") ;Press ESC key to quit
 
@@ -24,49 +30,79 @@ Func TestTearDown()
 EndFunc
 
 
-Test("test sheet 1")
+
+#Region Test("test sheet 1"): test red icon
+Test($test1)
 	InputDataFromExcel("Sheet1")
-	;Sleep(2000)
-	;ClickInsightIcon()
-	AddAttachmentToEmail( @ScriptDir & "\The_Outlook.jpg")
+	AddAttachmentToEmail( @ScriptDir & "\mailAttachments\The_Outlook.jpg")
+	Sleep(2000)
+	Local $resultStatus = IsIconRed()
+	ConsoleWrite("icon status red: " & $resultStatus & @CRLF)
+
+	$screenshotPath = TakeScreenShot($test1)
+	ConsoleWrite("attachment path in Test: " & $screenshotPath & @CRLF)
+
+	$result= AssertTrue($resultStatus,$screenshotPath)
+	_RefreshSystemTray()
 	Sleep(1000)
-	$screenshotPath = TakeScreenShot("test sheet 1")
-ConsoleWrite("attachment path in Test: " & $screenshotPath & @CRLF)
-$result = AssertEqual(3.4,3.5, $screenshotPath)
-_RefreshSystemTray()
-Sleep(1000)
 
+#EndRegion
 
-Test("test sheet 2")
+#Region Test("test sheet 2"): test yellow icon
+Test($test2)
 	InputDataFromExcel("Sheet2")
-	;Sleep(2000)
-	;ClickInsightIcon()
-	AddAttachmentToEmail( @ScriptDir & "\The_Outlook.jpg")
-	Sleep(1000)
-	$screenshotPath = TakeScreenShot("test sheet 2")
-ConsoleWrite("attachment path in Test: " & $screenshotPath & @CRLF)
-$result = AssertEqual(3.4,3.5, $screenshotPath)
-_RefreshSystemTray()
-Sleep(1000)
+	AddAttachmentToEmail( @ScriptDir & "\mailAttachments\The_Outlook.jpg")
+	Sleep(2000)
+	Local $resultStatus = IsIconYellow()
+	ConsoleWrite("icon status yellow: " & $resultStatus & @CRLF)
 
-Test("test sheet 3")
+	$screenshotPath = TakeScreenShot($test2)
+	ConsoleWrite("attachment path in Test: " & $screenshotPath & @CRLF)
+	$result= AssertTrue($resultStatus,$screenshotPath)
+	_RefreshSystemTray()
+	Sleep(1000)
+#EndRegion
+
+#Region Test("test sheet 3"): test green icon
+Test($test3)
 	InputDataFromExcel("Sheet3")
-	;Sleep(2000)
-	;ClickInsightIcon()
-	AddAttachmentToEmail( @ScriptDir & "\The_Outlook.jpg")
+	AddAttachmentToEmail( @ScriptDir & "\mailAttachments\The_Outlook.jpg")
+	Sleep(2000)
+	Local $resultStatus = IsIconGreen()
+	ConsoleWrite("icon status Green: " & $resultStatus & @CRLF)
+
+	;Local $resultStatus = IsIconRed()
+ 	;ConsoleWrite("icon status red: " & $resultStatus & @CRLF)
+ 	;$resultStatus = IsIconGreen()
+	;ConsoleWrite("icon status green: " & $resultStatus & @CRLF)
+ 	;Sleep(1000)
+
+
+	$screenshotPath = TakeScreenShot($test3)
+	ConsoleWrite("attachment path in Test: " & $screenshotPath & @CRLF)
+	$result= AssertTrue($resultStatus,$screenshotPath)
+	_RefreshSystemTray()
 	Sleep(1000)
-	$screenshotPath = TakeScreenShot("test sheet 3")
-ConsoleWrite("attachment path in Test: " & $screenshotPath & @CRLF)
-$result = AssertEqual(3.5,3.5, $screenshotPath)
-Sleep(2000)
+#EndRegion
 
 
+#Region Test("test sheet 4"): test attach all kinds of attachments
+Test($test4)
+	InputDataFromExcel("Sheet4")
+	AddAttachmentToEmail( @ScriptDir & "\mailAttachments\The_Outlook.jpg")
+	AddAttachmentToEmail( @ScriptDir & "\mailAttachments\sampleDOC.docx")
+	AddAttachmentToEmail( @ScriptDir & "\mailAttachments\samplePDF.pdf")
+	AddAttachmentToEmail( @ScriptDir & "\mailAttachments\sampleXLS.xlsx")
+	Sleep(1000)
+	Local $resultStatus = IsIconGreen()
+	ConsoleWrite("icon status Green: " & $resultStatus & @CRLF)
 
-
-
-
-
-
+	$screenshotPath = TakeScreenShot($test4)
+	ConsoleWrite("attachment path in Test: " & $screenshotPath & @CRLF)
+	$result= AssertTrue($resultStatus,$screenshotPath)
+	_RefreshSystemTray()
+	Sleep(1000)
+#EndRegion
 
 
 ;FlushTestResults()
