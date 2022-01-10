@@ -10,9 +10,10 @@
 #include <Excel.au3>
 #include <ScreenCapture.au3>
 #include "_ImageSearch_UDF.au3"
+#include <Array.au3>
+#include <WinAPI.au3>
 
-
-
+Opt("WinWaitDelay", 1000)
 AutoItSetOption('MouseCoordMode', 0)
 Global $iPID, $oOutlook, $oMail
 
@@ -24,18 +25,19 @@ Global $iWinTransitionTime = 250	; Time to wait for a window transition to take 
 Global $dateTimeFormated
 Global $date, $time, $dateTime
 Global $testcaseName
-
-
+Global $oOutlook , $oMail
+Global $popupTxt, $txtToVerify
 
 Func StartApp()
 	 $oOutlook = ObjCreate("Outlook.Application")
-	 Sleep(1000)
+	 Sleep(5000)
 	 $iPID = ProcessExists("OUTLOOK.EXE")
 	 ConsoleWrite("PID in start app = " & $iPID & @CRLF)
 	 $oMail = $oOutlook.CreateItem(0)
 	$oMail.Display
 
 Sleep(1000)
+
 EndFunc
 
 Func CloseApp()
@@ -58,7 +60,7 @@ EndFunc
 Func InputDataFromExcel($sheetname)
 
 Local $oExcel = _Excel_Open()
-Local $oWorkbook = _Excel_BookOpen($oExcel, @ScriptDir & "\InputData.xlsx")
+Local $oWorkbook = _Excel_BookOpen($oExcel, @ScriptDir & "\InputData_PreQA.xlsx")
 
 ;~ Local $oRange = $oWorkbook.ActiveSheet.Range("B5").Select ;;=> to copy a text then we paste later
      $oExcel.CopyObjectsWithCells = True
@@ -82,7 +84,15 @@ Local $titleEmail = _Excel_RangeRead($oWorkBook,$sheetname,"B4")
     $oMail.Subject = $titleEmail ;"Sample Subject"
 
 
+Sleep(2000)
+Local $winErrMsgBox =  WinWaitActive("AutoIt Error","",5)
+	If NOT $winErrMsgBox = 0 then
+		GetAllWindowsControls(WinGetHandle("AutoIt Error"))
 
+;~ 	ControlClick("[CLASS:Button; INSTANCE:1]","OK",
+;~ 	ControlClick(WinActivate("AutoIt Error"),"OK",
+
+	EndIf
 
 
 Local $oWordEditor = $oOutlook.ActiveInspector.wordEditor
@@ -199,6 +209,87 @@ Func IsIconYellow()
 	EndIf
 EndFunc
 
+Func GetMessFromPopup()
+	Sleep(1000)
+
+Local $winHwd = WinGetHandle("Mutual_DataBreachPrevention");
+ConsoleWriteError("Win Handle is " & $winHwd & @CRLF) ; first check. You should seen a handle
+
+Local  $sText2 = ControlGetText($winHwd, "", "[CLASS:Static; INSTANCE:2]")
+Local $sText3 = ControlGetText("Mutual_DataBreachPrevention","","[CLASS:Static; INSTANCE:2]")
+
+ConsoleWrite("text 2 = " & $sText2 & @CRLF)
+ConsoleWrite("text 3 = " & $sText3 & @CRLF)
+;~ Local $ctrlHwd = ControlGetHandle($winHwd, "", "[CLASS:Button; INSTANCE:2]") ;~ or Local $ctrlHwd = ControlGetHandle($winHwd, "", "4427")
+;~ ConsoleWriteError("Control Handle is " & $ctrlHwd & @CRLF) ; second  check. You should seen a handle
+;~ ControlSend($ctrlHwd, "", "", "{ENTER}")
+
+ConsoleWrite("PID getmessage = " & $iPID & @CRLF)
+
+return $sText2
+
+
+EndFunc
+
+Func IsMessContainsTxt($popupTxt, $txtToVerify)
+	Local $iPosition  = StringInStr($popupTxt,$txtToVerify)
+	If 	$iPosition  <> 0 then
+		ConsoleWrite("The search string first appears at position: " & $iPosition & @CRLF)
+	Else
+		ConsoleWrite("search string not found" & @CRLF)
+	EndIf
+EndFunc
+
+
+
+Func ClickSendMail()
+	;$oMail.Send()
+	MouseClick("left",39,225)
+Sleep(1000)
+MouseMove(@DesktopWidth/4 , @DesktopHeight/4)
+ConsoleWrite("PID in SendMAil part = " & $iPID & @CRLF)
+EndFunc
+
+Func ClickSendMail2()
+
+	Local $winHwd = WinGetHandle("[ACTIVE]")
+
+
+
+	$iOriginal = Opt("MouseCoordMode",2)             ;Get the current MouseCoordMode    ;Change the MouseCoordMode to relative coords
+
+$aPos = ControlGetPos($winHwd,"","[CLASS:Button; INSTANCE:1]")          ;Get the position of the given control
+ConsoleWrite("position is " & "x=" & $aPos[0] & " y= " & $aPos[1]  & @CRLF)
+MouseClick("left",$aPos[0],$aPos[1])
+Opt("MouseCoordMode",$iOriginal)               ;Change the MouseCoordMode back to the original
+
+
+
+
+	;_ControlMouseClick("Untitled - Message (HTML) ","","[CLASS:Button; INSTANCE:1]","left",1,10)
+	Sleep(500)
+	MouseMove(@DesktopWidth/4 , @DesktopHeight/4)
+EndFunc
+
+Func ClickCancelOnPopup()
+
+;~ If (WinWaitActive("Mutual_DataBreachPrevention") = 0) Then
+;~     MsgBox(0, "Timeout", "Window not seen")
+;~     Exit
+;~ EndIf
+Sleep(1000)
+Local $winHwd = WinGetHandle("Mutual_DataBreachPrevention");
+ConsoleWriteError("Win Handle is " & $winHwd & @CRLF) ; first check. You should seen a handle
+Local $ctrlHwd = ControlGetHandle($winHwd, "", "[CLASS:Button; INSTANCE:2]") ;~ or Local $ctrlHwd = ControlGetHandle($winHwd, "", "4427")
+ConsoleWriteError("Control Handle is " & $ctrlHwd & @CRLF) ; second  check. You should seen a handle
+ControlSend($ctrlHwd, "", "", "{ENTER}")
+
+	EndFunc
+
+
+
+
+
 
 
 #Region This part is to convert date time to name screenshot
@@ -261,6 +352,7 @@ Func TakeScreenShot($testcaseName)
 
 	;ShellExecute(@MyDocumentsDir & "\GDIPlus_Image1.jpg")
 Sleep(2000)
+ConsoleWrite("PID  in screenshot part = " & $iPID & @CRLF)
 	return $filePath
 EndFunc
 
@@ -331,6 +423,95 @@ Func _RefreshSystemTray($nDelay = 1000)
     SetError($error)
 EndFunc; _RefreshSystemTray()
 #EndRegion
+
+
+
+
+#Region GetAllWindowsControls with filter: https://www.autoitscript.com/forum/topic/164226-get-all-windows-controls/
+
+
+;~ ConsoleWrite("Make your window active!" & @CRLF)
+;~ Sleep(5000)
+
+;~ GetAllWindowsControls(WinGetHandle("[ACTIVE]"))
+
+Func GetAllWindowsControls($hCallersWindow, $bOnlyVisible=Default, $sStringIncludes=Default, $sClass=Default)
+    If Not IsHWnd($hCallersWindow) Then
+        ConsoleWrite("$hCallersWindow must be a handle...provided=[" & $hCallersWindow & "]" & @CRLF)
+        Return False
+    EndIf
+    ; Get all list of controls
+    If $bOnlyVisible = Default Then $bOnlyVisible = False
+    If $sStringIncludes = Default Then $sStringIncludes = ""
+    If $sClass = Default Then $sClass = ""
+    $sClassList = WinGetClassList($hCallersWindow)
+
+    ; Create array
+    $aClassList = StringSplit($sClassList, @CRLF, 2)
+
+    ; Sort array
+    _ArraySort($aClassList)
+    _ArrayDelete($aClassList, 0)
+
+    ; Loop
+    $iCurrentClass = ""
+    $iCurrentCount = 1
+    $iTotalCounter = 1
+
+    If StringLen($sClass)>0 Then
+        For $i = UBound($aClassList)-1 To 0 Step - 1
+            If $aClassList[$i]<>$sClass Then
+                _ArrayDelete($aClassList,$i)
+            EndIf
+        Next
+    EndIf
+
+    For $i = 0 To UBound($aClassList) - 1
+        If $aClassList[$i] = $iCurrentClass Then
+            $iCurrentCount += 1
+        Else
+            $iCurrentClass = $aClassList[$i]
+            $iCurrentCount = 1
+        EndIf
+
+        $hControl = ControlGetHandle($hCallersWindow, "", "[CLASSNN:" & $iCurrentClass & $iCurrentCount & "]")
+        $text = StringRegExpReplace(ControlGetText($hCallersWindow, "", $hControl), "[\n\r]", "{@CRLF}")
+        $aPos = ControlGetPos($hCallersWindow, "", $hControl)
+        $sControlID = _WinAPI_GetDlgCtrlID($hControl)
+        $bIsVisible = ControlCommand($hCallersWindow, "", $hControl, "IsVisible")
+        If $bOnlyVisible And Not $bIsVisible Then
+            $iTotalCounter += 1
+            ContinueLoop
+        EndIf
+
+        If StringLen($sStringIncludes) > 0 Then
+            If Not StringInStr($text, $sStringIncludes) Then
+                $iTotalCounter += 1
+                ContinueLoop
+            EndIf
+        EndIf
+
+
+
+
+
+        If IsArray($aPos) Then
+            ;ConsoleWrite("Func=[GetAllWindowsControls]: ControlCounter=[" & StringFormat("%3s", $iTotalCounter) & "] ControlID=[" & StringFormat("%5s", $sControlID) & "] Handle=[" & StringFormat("%10s", $hControl) & "] ClassNN=[" & StringFormat("%19s", $iCurrentClass & $iCurrentCount) & "] XPos=[" & StringFormat("%4s", $aPos[0]) & "] YPos=[" & StringFormat("%4s", $aPos[1]) & "] Width=[" & StringFormat("%4s", $aPos[2]) & "] Height=[" & StringFormat("%4s", $aPos[3]) & "] IsVisible=[" & $bIsVisible & "] Text=[" & $text & "]." & @CRLF)
+			FileWriteLine( @ScriptFullPath & "_listOfWinCtrl", "Func=[GetAllWindowsControls]: ControlCounter=[" & StringFormat("%3s", $iTotalCounter) & "] ControlID=[" & StringFormat("%5s", $sControlID) & "] Handle=[" & StringFormat("%10s", $hControl) & "] ClassNN=[" & StringFormat("%19s", $iCurrentClass & $iCurrentCount) & "] XPos=[" & StringFormat("%4s", $aPos[0]) & "] YPos=[" & StringFormat("%4s", $aPos[1]) & "] Width=[" & StringFormat("%4s", $aPos[2]) & "] Height=[" & StringFormat("%4s", $aPos[3]) & "] IsVisible=[" & $bIsVisible & "] Text=[" & $text & "]." & @CRLF )
+			FileWriteLine( @ScriptFullPath & "_listOfWinCtrl", "------------------------END of log-------------------------- " & @CRLF)
+		Else
+			FileWriteLine( @ScriptFullPath & "_listOfWinCtrl", "Func=[GetAllWindowsControls]: ControlCounter=[" & StringFormat("%3s", $iTotalCounter) & "] ControlID=[" & StringFormat("%5s", $sControlID) & "] Handle=[" & StringFormat("%10s", $hControl) & "] ClassNN=[" & StringFormat("%19s", $iCurrentClass & $iCurrentCount) & "] XPos=[winclosed] YPos=[winclosed] Width=[winclosed] Height=[winclosed] Text=[" & $text & "]." & @CRLF)
+			FileWriteLine( @ScriptFullPath & "_listOfWinCtrl", "------------------------END of log-------------------------- " & @CRLF)
+			;ConsoleWrite("Func=[GetAllWindowsControls]: ControlCounter=[" & StringFormat("%3s", $iTotalCounter) & "] ControlID=[" & StringFormat("%5s", $sControlID) & "] Handle=[" & StringFormat("%10s", $hControl) & "] ClassNN=[" & StringFormat("%19s", $iCurrentClass & $iCurrentCount) & "] XPos=[winclosed] YPos=[winclosed] Width=[winclosed] Height=[winclosed] Text=[" & $text & "]." & @CRLF)
+
+		EndIf
+
+        If Not WinExists($hCallersWindow) Then ExitLoop
+        $iTotalCounter += 1
+    Next
+EndFunc   ;==>GetAllWindowsControls
+#EndRegion
+
 
 #Region Phuoc workaround to send data into Outlook mail composer
 Func ClickNewEmail()

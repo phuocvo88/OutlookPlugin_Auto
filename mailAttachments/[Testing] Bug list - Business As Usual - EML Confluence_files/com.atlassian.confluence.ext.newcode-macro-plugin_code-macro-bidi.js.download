@@ -1,0 +1,172 @@
+WRMCB=function(e){var c=console;if(c&&c.log&&c.error){c.log('Error running batched script.');c.error(e);}}
+;
+try {
+/* module-key = 'com.atlassian.confluence.ext.newcode-macro-plugin:code-macro-bidi', location = 'scripts/code-macro-bidi-markers.js' */
+/**
+ * Bidirection character markers in code blocks.
+ */
+define('confluence/code-macro/bidi-markers', function () {
+    /**
+     * Selector for the server-rendered wrapper for the code macro.
+     * @see com.atlassian.confluence.ext.code.NewCodeMacro.getPanelCSSClass
+     * @see com.atlassian.confluence.ext.code.NewCodeMacro.getPanelContentCSSClass
+     * @type {string}
+     */
+    const panelSelector = '.code.panel .codeContent';
+
+    /**
+     * Selector for the server-rendered content of the macro.
+     * @see com.atlassian.confluence.ext.code.render.ContentFormatter.createRenderContent
+     * @type {string}
+     */
+    const unformattedContentSelector = 'pre.syntaxhighlighter-pre';
+
+    /**
+     * Selector for the content of the content after it was run through a syntax highlighter.
+     * @see getHtml()
+     * @see getLineHtml()
+     * @type {string}
+     */
+    const highlightedContentSelector = '.syntaxhighlighter .code .line';
+
+    const inlineCommentCodeMacroSelector = [
+        '.ic-content .wysiwyg-macro[data-macro-name="code"] pre', // Newly added inline comments in the frontend
+        '.ic-content .code.panel[data-macro-name="code"] pre' // Server-rendered inline comments
+    ].join(',');
+
+    const bidiRegex = /([\u202A-\u202E\u2066-\u2069])/g;
+
+    const bidiTooltip = "Bidirectional characters change the order that text is rendered. This could be used to obscure malicious code.";
+
+    /**
+     * Tokenises HTML string by BiDi characters.
+     * @param {string} input HTML string
+     * @returns {Array}
+     */
+    function tokeniseByBidiCharacters(input) {
+        return input.split(bidiRegex);
+    }
+
+    /**
+     * @param {string} input HTML string
+     * @returns {string} HTML string
+     */
+    function wrapCharacterInMarker(input) {
+        if (!bidiRegex.test(input)) {
+            return input;
+        }
+        const hexCode = input.charCodeAt(0).toString(16).toUpperCase();
+        const attrs = [];
+        attrs.push('class="bidi-marker"');
+        attrs.push('data-charcode="<U+' + hexCode + '>"');
+        attrs.push('title="' + bidiTooltip + '"');
+        attrs.push('aria-label="' + bidiTooltip + '"');
+        return '<span ' + attrs.join(' ') + '>' + input + '</span>';
+    }
+
+    /**
+     * @param {string} input
+     * @returns {string}
+     */
+    function addMarkers(input) {
+        return tokeniseByBidiCharacters(input).map(wrapCharacterInMarker).join('');
+    }
+
+    /**
+     * @param {HTMLElement} element
+     */
+    function decorateElement(element) {
+        // Prevent double decoration
+        if (element.dataset.bidiMarker) {
+            return;
+        }
+        element.dataset.bidiMarker = true;
+        element.innerHTML = addMarkers(element.innerHTML);
+    }
+
+    /**
+     * @param {HTMLElement} element
+     */
+    function addMarkersToCodeBlock(element) {
+        const codeLines = element.querySelectorAll(highlightedContentSelector);
+        Array.prototype.forEach.call(codeLines, decorateElement);
+    }
+
+    /**
+     * Attach a MutationObserver to the `<pre>` html node to watch for when the SyntaxHighlighter replaces it with the decorated version.
+     * While it's syntactically valid to place `<span>` inside a `<pre>`, the SyntaxHighlighter library doesn't play well with it and would turn the markers into a visible plain text.
+     * @param {Node} codeBlock
+     */
+    function observePreBlock(codeBlock) {
+        const observer = new MutationObserver(function (mutationsList, observer) {
+            mutationsList.forEach(function (mutation) {
+                Array.prototype.forEach.call(mutation.addedNodes, addMarkersToCodeBlock);
+            });
+            const isUnformatted = codeBlock.querySelectorAll(unformattedContentSelector).length > 0;
+            if (!isUnformatted) {
+                observer.disconnect();
+            }
+        });
+        observer.observe(codeBlock, { childList: true });
+    }
+
+    /**
+     *
+     * @param {Node} node
+     * @returns
+     */
+    function isElementNode(node) {
+        return node.nodeType === 1;
+    }
+
+    /**
+     *
+     * @param {Node} codeBlock
+     */
+    function addMarkersToInlineComment(codeBlock) {
+        if (!isElementNode(codeBlock)) {
+            return;
+        }
+        const codeBlocks = codeBlock.querySelectorAll(inlineCommentCodeMacroSelector);
+        Array.prototype.forEach.call(codeBlocks, decorateElement);
+    }
+
+    /**
+     * Attach a MutationObserver to new inline comments being added to DOM.
+     * @param {Node} codeBlock
+     */
+    function observeInlineComments() {
+        const observer = new MutationObserver(function (mutationsList) {
+            mutationsList.forEach(function (mutation) {
+                Array.prototype.forEach.call(mutation.addedNodes, addMarkersToInlineComment);
+            });
+        });
+        const contentRoot = document.getElementById('content');
+        observer.observe(contentRoot, { childList: true, subtree: true });
+    }
+
+    function init() {
+        const codeBlocks = document.querySelectorAll(panelSelector);
+        Array.prototype.forEach.call(codeBlocks, function (codeBlock) {
+            const isUnformatted = codeBlock.querySelectorAll(unformattedContentSelector).length > 0;
+            if (isUnformatted) {
+                observePreBlock(codeBlock);
+            } else {
+                addMarkersToCodeBlock(codeBlock);
+            }
+        });
+        observeInlineComments();
+    }
+
+    return init;
+});
+
+require('confluence/module-exporter').safeRequire('confluence/code-macro/bidi-markers', function (BidiMarkers) {
+    if (document.readyState === 'loading') {
+        window.addEventListener('DOMContentLoaded', BidiMarkers);
+    } else {
+        BidiMarkers();
+    }
+});
+
+}catch(e){WRMCB(e)};
